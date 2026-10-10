@@ -5,17 +5,17 @@ import java.util.UUID;
 public class User {
 
     private UUID id;
-    private String nome;
+    private String name;
     private String email;
-    private String senha;
+    private String password;
     private UserType userType;
 
-    public User(UUID id, String nome, String email, String senha, UserType userType) {
+    public User(UUID id, String name, String email, String password, UserType userType) {
 
         this.id = id;
-        this.nome = nome;
+        this.name = name;
         this.email = email;
-        this.senha = senha;
+        this.password = password;
         this.userType = userType;
     }
 
@@ -23,16 +23,16 @@ public class User {
         return id;
     }
 
-    public String getNome() {
-        return nome;
+    public String getName() {
+        return name;
     }
 
     public String getEmail() {
         return email;
     }
 
-    public String getSenha() {
-        return senha;
+    public String getPassword() {
+        return password;
     }
 
     public UserType getUserType() {
