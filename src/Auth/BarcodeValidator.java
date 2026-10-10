@@ -1,6 +1,6 @@
 package Auth;
 
-public class codebarValidator {
+public class BarcodeValidator {
 
     public static boolean isValid(String barcode){
 
