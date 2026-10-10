@@ -15,6 +15,8 @@ public class Product {
     private int stock;
 
     public Product(UUID id, String name, Category category, String brand, String barCode, BigDecimal price, int stock) {
+
+        this.id = id;
         this.name = name;
         this.category = category;
         this.brand = brand;
