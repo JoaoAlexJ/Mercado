@@ -10,7 +10,7 @@ public class User {
     private String password;
     private UserType userType;
 
-    public User(UUID id, String name, String email, String password, UserType userType) {
+    public User(UUID id, String nome, String email, String senha, UserType userType) {
 
         this.id = id;
         this.name = name;
