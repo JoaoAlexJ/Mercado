@@ -1,6 +1,7 @@
 package services;
 
 import model.User;
+import model.UserRequestDTO;
 import repository.UserRepository;
 
 import java.util.List;
@@ -19,7 +20,7 @@ public class UserService {
 
     public User registerUser(UserRequestDTO userRequestDTO){
 
-        if (userRepository.findByEmail(userRequestDTO.email).isPresent()){
+        if (userRepository.findByEmail(userRequestDTO.email()).isPresent()){
             throw new IllegalArgumentException("Email already register in system");
         }
 
@@ -27,10 +28,10 @@ public class UserService {
 
         User newUser = new User(
                 id,
-                userRequestDTO.name,
-                userRequestDTO.email,
-                userRequestDTO.password,
-                userRequestDTO.userType);
+                userRequestDTO.name(),
+                userRequestDTO.email(),
+                userRequestDTO.password(),
+                userRequestDTO.userType());
 
         userRepository.save(newUser);
         return newUser;
