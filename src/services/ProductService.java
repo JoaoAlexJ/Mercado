@@ -1,12 +1,10 @@
 package services;
 
-import Auth.BarcodeValidator;
+import security.Auth.BarcodeValidator;
 import model.Product;
 import model.ProductRequestDTO;
 import repository.ProductRepository;
-import repository.ProductRepositoryInMemory;
 
-import java.lang.classfile.Opcode;
 import java.util.*;
 
 public class ProductService {

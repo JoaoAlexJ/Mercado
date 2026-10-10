@@ -1,4 +1,4 @@
-package Auth;
+package security.Auth;
 
 public class BarcodeValidator {
 
