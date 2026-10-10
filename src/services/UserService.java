@@ -23,12 +23,13 @@ public class UserService {
             throw new IllegalArgumentException("Email already register in system");
         }
 
+        UUID id = UUID.randomUUID();
 
         User newUser = new User(
-                userRequestDTO.id,
+                id,
                 userRequestDTO.name,
                 userRequestDTO.email,
-                userRequestDTO.passWord,
+                userRequestDTO.password,
                 userRequestDTO.userType);
 
         userRepository.save(newUser);

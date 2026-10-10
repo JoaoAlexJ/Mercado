@@ -7,15 +7,15 @@ public class User {
     private UUID id;
     private String nome;
     private String email;
-    private String senha;
+    private String password;
     private UserType userType;
 
-    public User(UUID id, String nome, String email, String senha, UserType userType) {
+    public User(UUID id, String nome, String email, String password, UserType userType) {
 
         this.id = id;
         this.nome = nome;
         this.email = email;
-        this.senha = senha;
+        this.password = password;
         this.userType = userType;
     }
 
@@ -31,8 +31,8 @@ public class User {
         return email;
     }
 
-    public String getSenha() {
-        return senha;
+    public String getPassword() {
+        return password;
     }
 
     public UserType getUserType() {
