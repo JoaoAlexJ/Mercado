@@ -25,8 +25,8 @@ public class ProductService {
             throw new IllegalArgumentException("Invalid barcode");
         }
 
-        if (findProductByBarcode(data.barCode()) != null){
-            throw new IllegalArgumentException("Product already registered with barcode: "+data.barCode());
+        if (productRepository.findByBarCode(data.barCode()).isPresent()){
+            throw new IllegalArgumentException("Product already registered with barcode: "+data.barCode()+" Name of product: "+data.name());
         }
 
 
