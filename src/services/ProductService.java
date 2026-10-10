@@ -7,16 +7,14 @@ import repository.ProductRepository;
 import repository.ProductRepositoryInMemory;
 
 import java.lang.classfile.Opcode;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public class ProductService {
 
     private ProductRepository productRepository;
 
-    public ProductService(ProductRepositoryInMemory productRepositoryInMemory) {
-        this.productRepository = Objects.requireNonNull(productRepositoryInMemory);
+    public ProductService(ProductRepository productRepository) {
+        this.productRepository = Objects.requireNonNull(productRepository);
     }
 
     //-----------------//
@@ -27,7 +25,7 @@ public class ProductService {
             throw new IllegalArgumentException("Invalid barcode");
         }
 
-        if (productRepository.findByBarCode(data.barCode()).isPresent()){
+        if (findProductByBarcode(data.barCode()) != null){
             throw new IllegalArgumentException("Product already registered with barcode: "+data.barCode());
         }
 
@@ -48,4 +46,34 @@ public class ProductService {
 
 
     }
+    //---------------//
+
+    public Product findProductByBarcode(String barcode){
+        return productRepository.findByBarCode(barcode).orElseThrow(()-> new NoSuchElementException("Product not found"));
+    }
+
+    public Product findProductById(UUID id){
+        return productRepository.findByID(id).orElseThrow(()-> new NoSuchElementException("Product not found"));
+    }
+
+    public List<Product> findAllProducts(){
+        return productRepository.findAll();
+    }
+
+    public void deleteByBarcode(String barcode){
+
+        if (findProductByBarcode(barcode) == null){
+            throw new NoSuchElementException("Product not found");
+        }
+        productRepository.deleteByBarCode(barcode);
+    }
+
+    public void deleteById(UUID id){
+
+        if (findProductById(id) == null){
+            throw new NoSuchElementException("Product not found");
+        }
+        productRepository.delete(id);
+    }
+
 }
