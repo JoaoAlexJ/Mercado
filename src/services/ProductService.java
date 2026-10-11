@@ -1,6 +1,6 @@
 package services;
 
-import security.Auth.BarcodeValidator;
+import security.BarcodeValidator;
 import model.Product;
 import model.ProductRequestDTO;
 import repository.ProductRepository;
