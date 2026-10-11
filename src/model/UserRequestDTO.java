@@ -3,7 +3,7 @@ package model;
 import java.util.Objects;
 import java.util.UUID;
 
-public record UserRequestDTO(String name, String email, String password, UserType userType) {
+public record UserRequestDTO(String name, String email, String password) {
 
     public UserRequestDTO {
 
@@ -19,9 +19,6 @@ public record UserRequestDTO(String name, String email, String password, UserTyp
             throw new IllegalArgumentException("Password cannot be null or empty");
         }
 
-        if (userType == null){
-            throw new IllegalArgumentException("UsderType cannot be null or empty");
-        }
 
         name = name.trim();
         email = email.trim();

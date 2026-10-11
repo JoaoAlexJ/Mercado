@@ -5,7 +5,7 @@ import model.UserType;
 
 import java.util.Objects;
 
-public class userSession {
+public class UserSession {
 
     private static User currentUser;
 
@@ -25,11 +25,11 @@ public class userSession {
         return currentUser;
     }
 
-    public boolean isAuthenticated(){
+    public static boolean isAuthenticated(){
         return currentUser != null;
     }
 
-    public boolean isAdm(){
+    public static boolean isAdm(){
         return currentUser.getUserType() == UserType.ADM;
     }
 
