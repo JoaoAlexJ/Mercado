@@ -9,6 +9,10 @@ public class UserSession {
 
     private static User currentUser;
 
+    private UserSession() {
+
+    }
+
     public static void login(User user){
         currentUser = Objects.requireNonNull(user, "User cannot be null");
     }
