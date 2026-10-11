@@ -58,20 +58,27 @@ public class ProductService {
         return productRepository.findAll();
     }
 
-    public void deleteByBarcode(String barcode){
+    public Product deleteByBarcode(String barcode){
 
-        if (findProductByBarcode(barcode) == null){
+        Product p = findProductByBarcode(barcode);
+
+        if (p == null){
             throw new NoSuchElementException("Product not found");
         }
         productRepository.deleteByBarCode(barcode);
+        return p;
     }
 
-    public void deleteById(UUID id){
+    public Product deleteById(UUID id){
 
-        if (findProductById(id) == null){
+        Product p = findProductById(id);
+
+        if (p == null){
             throw new NoSuchElementException("Product not found");
         }
         productRepository.delete(id);
+        return p;
+
     }
 
 }
