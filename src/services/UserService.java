@@ -4,6 +4,7 @@ import model.User;
 import model.UserRequestDTO;
 import model.UserType;
 import repository.UserRepository;
+import security.PasswordHasher;
 import security.UserSession;
 
 import java.util.List;
@@ -25,7 +26,9 @@ public class UserService {
 
         User user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("Invalid email or password"));
 
-        if (!user.getPassword().equals(password)) {
+        String hashPassword = PasswordHasher.hash(password);
+
+        if (!user.getPassword().equals(hashPassword)) {
             throw new IllegalArgumentException("Invalid email or password");
         }
 
@@ -42,12 +45,13 @@ public class UserService {
         }
 
         UUID id = UUID.randomUUID();
+        String hashPassword = PasswordHasher.hash(userRequestDTO.password());
 
         User newUser = new User(
                 id,
                 userRequestDTO.name(),
                 userRequestDTO.email(),
-                userRequestDTO.password(),
+                hashPassword,
                 UserType.CLIENTE);
 
         userRepository.save(newUser);
