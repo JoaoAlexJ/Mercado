@@ -1,6 +1,7 @@
 package printer;
 
 import model.Product;
+import model.User;
 
 public class Printer {
 
@@ -24,7 +25,16 @@ public class Printer {
         System.out.println("Stock: "+p.getStock());
     }
 
-    public static void printMainProductMenu(){
+    public static void printUser(User u){
+
+        System.out.println("        User");
+        System.out.println("ID: "+u.getId());
+        System.out.println("Name: "+u.getName());
+        System.out.println("Email: "+u.getEmail());
+        System.out.println("User Type: "+u.getUserType());
+    }
+
+    public static void printMainAdmMenu(){
 
         System.out.println("==== Main Adm menu ====");
         System.out.println("1 - Products");
@@ -35,12 +45,28 @@ public class Printer {
 
     public static void printProductMenuAdm(){
         System.out.println("1 - Register product");
-        System.out.println("2 - List all products");
-        System.out.println("3 - Find product by ID");
-        System.out.println("4 - find product by barcode");
-        System.out.println("5 - Delete by ID");
-        System.out.println("6 - Dele by barcode");
-        System.out.println("7 - exit");
+        System.out.println("2 - Find all products");
+        System.out.println("3 - Find by category");
+        System.out.println("4 - Find product by ID");
+        System.out.println("5 - find product by barcode");
+        System.out.println("6 - Delete by ID");
+        System.out.println("7 - Dele by barcode");
+        System.out.println("0 - exit");
+        System.out.print("-> ");
+    }
+
+    public static void printUserMeenuAdm(){
+
+        System.out.println("1 - Adm register");
+        System.out.println("2 - Customer register");
+        System.out.println("3 - Find all costumer");
+        System.out.println("4 - Find all administrators");
+        System.out.println("5 - Find all users");
+        System.out.println("6 - find by ID");
+        System.out.println("7 - find by Email");
+        System.out.println("8 - Delete by ID");
+        System.out.println("9 - Delete by Email");
+        System.out.println("0 - exit");
         System.out.print("-> ");
     }
 }

@@ -1,24 +1,19 @@
 package Flow;
 
-import model.Category;
-import model.Product;
-import model.ProductRequestDTO;
+import model.*;
 import printer.Printer;
-import security.BarcodeValidator;
 import security.UserSession;
 import services.ProductService;
 import services.UserService;
 
-import javax.print.attribute.standard.PrinterName;
 import java.math.BigDecimal;
-import java.util.Scanner;
-import java.util.UUID;
+import java.util.*;
 
 public class AdmFlow {
 
-    private UserService userService;
-    private ProductService productService;
-    private Scanner scanner;
+    private final UserService userService;
+    private final ProductService productService;
+    private final Scanner scanner;
 
     public AdmFlow(UserService userService, ProductService productService, Scanner scanner) {
         this.userService = userService;
@@ -40,165 +35,421 @@ public class AdmFlow {
         }
 
 
-        Printer.printMainProductMenu();
-        byte mainChoice = scanner.nextByte();
-        Printer.lineBreak();
-        Printer.line();
+        boolean runningMain = true;
+        while (runningMain){
 
-        scanner.nextLine();
+            Printer.printMainAdmMenu();
+            byte mainChoice = readByte();
+            Printer.lineBreak();
+            Printer.line();
 
-        switch (mainChoice){
+            switch (mainChoice){
 
-            case 1:
+                case 1:
 
-                boolean doIt = true;
-                while (doIt){
+                    runProductMenu();
+                    break;
 
-                    Printer.printProductMenuAdm();
-                    byte productChoice = scanner.nextByte();
+                case 2:
 
-                    scanner.nextLine();
+                    runUserMenu();
+                    break;
 
-                    Printer.lineBreak();
+                case 3:
+                    runningMain = false;
+                    break;
+
+                default:
+                    System.out.println("Invalid choice.");
                     Printer.line();
+                    break;
 
-                    switch (productChoice){
-
-                        case 1:
-
-                           registerProduct();
-                           Printer.lineBreak();
-                           Printer.line();
-
-                           break;
-
-                        case 2:
-
-                            for (Product p : productService.findAllProducts()){
-
-                                Printer.printProduct(p);
-                            }
-
-                            Printer.lineBreak();
-                            break;
-
-                        case 3:
-
-                            System.out.print("Provide ID: ");
-                            UUID id = UUID.fromString(scanner.nextLine());
-
-                            Product p = productService.findProductById(id);
-
-                            Printer.printProduct(p);
-                            Printer.lineBreak();
-                            Printer.line();
-
-                            break;
-
-                        case 4:
-
-                            System.out.print("Provide barcode: ");
-                            String barcodeInput = scanner.nextLine();
-
-                            Product p1 = productService.findProductByBarcode(barcodeInput);
-                            Printer.printProduct(p1);
-
-                            Printer.lineBreak();
-                            Printer.line();
-                            break;
-
-                        case 5:
-
-                            System.out.print("Provide ID: ");
-                            UUID idDel = UUID.fromString(scanner.nextLine());
-
-                            Product pDel = productService.deleteById(idDel);
-
-                            System.out.println("Product Deleted");
-                            Printer.printProduct(pDel);
-
-                            Printer.lineBreak();
-                            Printer.line();
-                            break;
-
-                        case 6:
-
-                            System.out.print("Provide barcode: ");
-                            String barcodeDel = scanner.nextLine();
-
-                            Product pDelBar = productService.deleteByBarcode(barcodeDel);
-
-                            System.out.println("Product Deleted");
-                            Printer.printProduct(pDelBar);
-
-                            Printer.lineBreak();
-                            Printer.line();
-
-                            break;
-
-                        case 7:
-                            doIt = false;
-                            break;
-
-                        default:
-                            System.err.println("Invalid choice");
-                            break;
-
-                    }
-
-                }
-
-                break;
-
-            case 2:
-
-                System.out.println("");
-
-
+            }
 
         }
 
     }
 
+
+
+    //--------------------------------------- Registers ---------------------------------------
+
     private void registerProduct(){
 
-        System.out.print("Product name: ");
-        String name = scanner.nextLine();
+        try {
 
-        System.out.print("Categoria: ");
-        String category = scanner.nextLine();
+            System.out.print("Product name: ");
+            String name = scanner.nextLine();
 
-        Category categoryOfc = Category.valueOf(category.trim().toUpperCase());
+            System.out.print("Categoria: ");
+            String category = scanner.nextLine();
 
-        System.out.print("Brand: ");
-        String brand = scanner.nextLine();
+            Category categoryOfc = null;
 
-        System.out.print("Barcode: ");
-        String barcode = scanner.nextLine();
+            try{
+                categoryOfc = Category.valueOf(category.trim().toUpperCase());
 
-        if (!BarcodeValidator.isValid(barcode)){
-            throw new IllegalArgumentException("Invalid barcode");
+            } catch (IllegalArgumentException e){
+                System.err.println("Invalid category, Available categorys: ");
+                Arrays.stream(Category.values()).forEach(System.err::println);
+                return;
+            }
+
+            System.out.print("Brand: ");
+            String brand = scanner.nextLine();
+
+            System.out.print("Barcode: ");
+            String barcode = scanner.nextLine();
+
+            System.out.print("Price: ");
+            BigDecimal price = new BigDecimal(scanner.nextLine().trim().replace(",", ".")) ;
+
+            System.out.print("Estoque: ");
+            int stock = Integer.parseInt(scanner.nextLine());
+
+
+            ProductRequestDTO productRequestDTO = new ProductRequestDTO(
+                    name,categoryOfc, brand, barcode, price, stock
+            );
+
+            Product p = productService.registerProduct(productRequestDTO);
+
+            Printer.lineBreak();
+            Printer.line();
+            System.out.println("Product registered!");
+            Printer.printProduct(p);
+
+        }catch (NumberFormatException e ) {
+            System.err.println("Invalid numeric value for price or stock.");
+        }catch (IllegalArgumentException e ){
+            System.err.println("Validation failed: "+e.getMessage());
         }
 
-        System.out.print("Pice: ");
-        BigDecimal price = scanner.nextBigDecimal();
+    }
 
-        System.out.print("Estoque: ");
-        int stok = scanner.nextInt();
+    private void registerUserAdm(){
 
-        scanner.nextLine();
+        System.out.print("Name: ");
+        String name = scanner.nextLine();
 
-        ProductRequestDTO productRequestDTO = new ProductRequestDTO(
-                name,categoryOfc, brand, barcode, price, stok
-        );
+        System.out.print("Email: ");
+        String email = scanner.nextLine();
 
-        Product p = productService.registerProduct(productRequestDTO);
+        System.out.print("Password: ");
+        String password = scanner.nextLine();
+
+        UserRequestDTO dto = new UserRequestDTO(name, email, password);
+
+        userService.registerAdm(dto);
+        System.out.println("Registered user!");
+
+        Printer.lineBreak();
+        Printer.line();
+    }
+
+    private void registerCustomer(){
+
+        System.out.print("Name: ");
+        String name = scanner.nextLine();
+
+        System.out.print("Email: ");
+        String email = scanner.nextLine();
+
+        System.out.print("Password: ");
+        String password = scanner.nextLine();
+
+        UserRequestDTO dto = new UserRequestDTO(name, email, password);
+
+        userService.registerCustomer(dto);
+        System.out.println("Registered user!");
 
         Printer.lineBreak();
         Printer.line();
 
-        System.out.println("Product registered!");
-        Printer.printProduct(p);
 
+    }
+
+
+    //--------------------------------------- Running Menu ---------------------------------------
+
+    private void runProductMenu(){
+
+        boolean runningProduct = true;
+        while (runningProduct){
+
+            Printer.printProductMenuAdm();
+            byte productChoice = readByte();
+
+            Printer.lineBreak();
+
+            switch (productChoice){
+
+                case 1:
+
+                    registerProduct();
+                    Printer.lineBreak();
+                    Printer.line();
+
+                    break;
+
+                case 2:
+
+                    productService.findAllProducts().forEach(Printer::printProduct);
+                    Printer.lineBreak();
+                    break;
+
+                case 3:
+
+                    System.out.print("Provide Category: ");
+                    String categoryInput = scanner.nextLine();
+
+                    List<Product> categoryProducts = productService.findByCategory(categoryInput);
+
+                    if (categoryProducts.isEmpty()){
+                        System.out.println("No products found for category: "+categoryInput);
+                        System.out.println("Available categories: "+ Arrays.toString(Category.values()));
+                    }else {
+                        categoryProducts.forEach(Printer::printProduct);
+                    }
+
+                    Printer.lineBreak();
+
+                    break;
+
+                case 4:
+
+                    System.out.print("Provide ID: ");
+                    try {
+                        UUID id = UUID.fromString(scanner.nextLine());
+
+                        Product p = productService.findProductById(id);
+
+
+                        Printer.printProduct(p);
+                    }catch (IllegalArgumentException e){
+                        System.err.println("Invalid ID format.");
+
+                    }catch (NoSuchElementException e){
+                        System.err.println("Product not found");
+
+                    }
+
+
+                    Printer.lineBreak();
+                    Printer.line();
+
+                    break;
+
+                case 5:
+
+                    System.out.print("Provide barcode: ");
+                    String barcodeInput = scanner.nextLine();
+
+                    try {
+
+                         Printer.printProduct(productService.findProductByBarcode(barcodeInput));
+
+                    }catch (NoSuchElementException e ){
+                        System.err.println("Product not found");
+
+                    }
+
+                    Printer.lineBreak();
+                    Printer.line();
+                    break;
+
+                case 6:
+
+                    System.out.print("Provide ID: ");
+
+                    try {
+                        UUID idDel = UUID.fromString(scanner.nextLine());
+
+                        Product pDel = productService.deleteById(idDel);
+
+                        System.out.println("Product Deleted");
+                        Printer.printProduct(pDel);
+
+                    }catch (IllegalArgumentException e){
+                        System.err.println("Invalid UUID format: ");
+
+                    }catch (NoSuchElementException e){
+                        System.err.println("Product not found: "+e.getMessage());
+
+                    }
+                    Printer.lineBreak();
+                    Printer.line();
+                    break;
+
+                case 7:
+
+                    System.out.print("Provide barcode: ");
+                    String barcodeDel = scanner.nextLine();
+
+                    try {
+
+                        Printer.printProduct(productService.deleteByBarcode(barcodeDel));
+                    }catch (NoSuchElementException e){
+                        System.err.println("Product not found.");
+                        break;
+                    }
+
+                    System.out.println("Product Deleted");
+                    Printer.lineBreak();
+                    Printer.line();
+
+                    break;
+
+                case 0:
+                    runningProduct = false;
+                    break;
+
+                default:
+                    System.out.println("Invalid choice");
+                    Printer.line();
+                    break;
+
+            }
+
+        }
+    }
+
+    public void runUserMenu(){
+
+        boolean runUserMenu = true;
+        while (runUserMenu){
+
+            Printer.printUserMeenuAdm();
+            byte choiceUser = readByte();
+
+            switch (choiceUser){
+
+                case 1:
+
+                    registerUserAdm();
+                    break;
+
+                case 2:
+
+                    registerCustomer();
+                    break;
+
+                case 3:
+
+                    userService.findAllCustomers().forEach(Printer::printUser);
+                    Printer.lineBreak();
+                    break;
+
+                case 4:
+
+                    userService.findAllAdm().forEach(Printer::printUser);
+                    Printer.lineBreak();
+                    break;
+
+                case 5:
+
+                    userService.findAllUsers().forEach(Printer::printUser);
+                    Printer.lineBreak();
+                    break;
+
+                case 6:
+
+                    System.out.print("Provide ID: ");
+                    try {
+                        Printer.printUser(userService.findById(UUID.fromString(scanner.nextLine())));
+                        Printer.lineBreak();
+                        Printer.line();
+
+                    }catch (IllegalArgumentException e ){
+                        System.err.println("Invalid ID.");
+
+
+                    }catch (NoSuchElementException e){
+                        System.err.println("User not found: "+e.getMessage());
+
+                    }
+
+                    break;
+
+                case 7:
+
+                    System.out.print("Provide Email: ");
+
+                    try {
+
+                        Printer.printUser(userService.findByEmail(scanner.nextLine()));
+                    }catch (NoSuchElementException e){
+                        System.err.println("User not found. ");
+                    }catch (SecurityException e){
+                        System.err.println(e.getMessage());
+                    }
+
+                    Printer.lineBreak();
+                    Printer.line();
+                    break;
+
+                case 8:
+
+                    System.out.print("Provide ID: ");
+
+                    try {
+
+                        userService.deleteById(UUID.fromString(scanner.nextLine()));
+                        System.out.println("User deleted!");
+
+                    }catch (IllegalArgumentException e){
+                        System.err.println("Invalid ID.");
+
+
+                    }catch (NoSuchElementException e){
+                        System.err.println("User not found.");
+
+                    }
+
+                    break;
+                case 9:
+
+                    System.out.print("Provide Email: ");
+
+                    try {
+
+                        Printer.printUser(userService.deleteByEmail(scanner.nextLine()));
+
+                    }catch (NoSuchElementException e){
+                        System.err.println("User not found.");
+
+                    }catch (SecurityException e){
+                        System.err.println(e.getMessage());
+
+                    }
+
+                    Printer.lineBreak();
+                    Printer.line();
+                    break;
+
+                case 0:
+
+                    runUserMenu = false;
+                    break;
+
+                default:
+                    System.out.println("Invalid choice");
+                    Printer.line();
+                    break;
+
+            }
+
+        }
+    }
+
+    //--------------------------------------- UTILITY ANT-CRASH ---------------------------------------
+
+    private byte readByte(){
+
+        try{
+            return Byte.parseByte(scanner.nextLine());
+        }catch (NumberFormatException e) {
+            return -1;
+        }
     }
 }

@@ -1,5 +1,6 @@
 package services;
 
+import model.Category;
 import security.BarcodeValidator;
 import model.Product;
 import model.ProductRequestDTO;
@@ -55,7 +56,32 @@ public class ProductService {
     }
 
     public List<Product> findAllProducts(){
+
+        if (productRepository.findAll().isEmpty()){
+            System.out.println("No products registered in the catalog");
+        }
+
         return productRepository.findAll();
+    }
+
+    public List<Product> findByCategory(String category){
+
+        if (category == null || category.isBlank()){
+            return List.of();
+        }
+
+        final Category targetCategory;
+
+        try {
+
+            targetCategory = Category.valueOf(category.trim().toUpperCase());
+        }catch (IllegalArgumentException e){
+            return List.of();
+        }
+
+        return findAllProducts().stream()
+                .filter(p -> p.getCategory() == targetCategory)
+                .toList();
     }
 
     public Product deleteByBarcode(String barcode){

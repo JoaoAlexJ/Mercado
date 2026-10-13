@@ -52,7 +52,7 @@ public class UserService {
                 userRequestDTO.name(),
                 userRequestDTO.email(),
                 hashPassword,
-                UserType.CLIENTE);
+                UserType.CUSTUMER);
 
         userRepository.save(newUser);
         return newUser;
@@ -70,11 +70,13 @@ public class UserService {
         }
 
         UUID id = UUID.randomUUID();
+        String hashpassword = PasswordHasher.hash(userRequestDTO.password());
+
         User newUser = new User(
                 id,
                 userRequestDTO.name(),
                 userRequestDTO.email(),
-                userRequestDTO.password(),
+                hashpassword,
                 UserType.ADM
         );
 
@@ -111,10 +113,26 @@ public class UserService {
         }
 
         if (userRepository.findAll().isEmpty()){
-            System.err.println("no registered users");
+            System.out.println("no registered users");
         }
 
         return userRepository.findAll();
+    }
+
+    public List<User> findAllAdm(){
+
+        return findAllUsers().stream()
+                .filter(u -> u.getUserType().equals(UserType.ADM))
+                .toList();
+
+    }
+
+    public List<User> findAllCustomers(){
+
+        return findAllUsers().stream()
+                .filter(u -> u.getUserType().equals(UserType.CUSTUMER))
+                .toList();
+
     }
 
     public void deleteById(UUID id){
@@ -129,13 +147,15 @@ public class UserService {
 
     }
 
-    public void deleteByEmail(String email){
+    public User deleteByEmail(String email){
         if (!UserSession.isAdm()){
             throw new SecurityException("Only administrators can do this");
         }
 
-        findByEmail(email);
+        User user = findByEmail(email);
         userRepository.deleteByEmail(email);
+        return user;
+
     }
 
 
