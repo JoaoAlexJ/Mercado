@@ -319,7 +319,7 @@ public class AdmFlow {
         boolean runUserMenu = true;
         while (runUserMenu){
 
-            Printer.printUserMeenuAdm();
+            Printer.printUserMenuAdm();
             byte choiceUser = readByte();
 
             switch (choiceUser){

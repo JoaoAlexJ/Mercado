@@ -55,7 +55,7 @@ public class Printer {
         System.out.print("-> ");
     }
 
-    public static void printUserMeenuAdm(){
+    public static void printUserMenuAdm(){
 
         System.out.println("1 - Adm register");
         System.out.println("2 - Customer register");
@@ -69,4 +69,16 @@ public class Printer {
         System.out.println("0 - exit");
         System.out.print("-> ");
     }
+
+    public static void printProductMenuCustomer(){
+
+        System.out.println("1 - find all products");
+        System.out.println("2 - find by ID");
+        System.out.println("3 - find by category");
+        System.out.println("4 - find by brand");
+        System.out.println("5 - find by name");
+
+    }
+
+
 }
