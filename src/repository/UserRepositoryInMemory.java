@@ -20,11 +20,24 @@ public class UserRepositoryInMemory implements UserRepository{
     @Override
     public void delete(UUID id) {
 
-        userMap.remove(id);
+        if (id == null){
+            throw new IllegalArgumentException("Invalid ID: "+id);
+        }
+
+        User userRemoved = userMap.remove(id);
+
+        if (userRemoved == null){
+            throw new NoSuchElementException("Product not found with this ID: "+id);
+        }
+
     }
 
     @Override
     public Optional<User> findByID(UUID id) {
+
+        if (id == null){
+            return Optional.empty();
+        }
 
         return Optional.ofNullable(userMap.get(id));
     }
@@ -36,6 +49,11 @@ public class UserRepositoryInMemory implements UserRepository{
 
     @Override
     public Optional<User> findByEmail(String email) {
+
+        if (email == null || email.isBlank()){
+            throw new IllegalArgumentException("Invalid Email: "+email);
+        }
+
         return userMap.values().stream()
                 .filter(u -> u.getEmail().equalsIgnoreCase(email))
                 .findFirst();

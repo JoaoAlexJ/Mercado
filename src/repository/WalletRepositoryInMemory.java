@@ -9,7 +9,11 @@ public class WalletRepositoryInMemory implements WalletRepository{
     private final Map<UUID, Wallet> walletMap = new HashMap<>();
 
     @Override
-    public Optional<Wallet> findByIdUser(UUID id) {
+    public Optional<Wallet> findByIDUser(UUID id) {
+        if (id == null){
+            return Optional.empty();
+        }
+
         return walletMap.values().stream()
                 .filter(w -> w.getIdUser().equals(id))
                 .findFirst();
@@ -30,11 +34,11 @@ public class WalletRepositoryInMemory implements WalletRepository{
             throw new IllegalArgumentException("Invalida ID");
         }
 
-        if (findByID(id).isEmpty()){
-            throw new IllegalArgumentException("Wallet is not found");
-        }
+        Wallet walletRemoved = walletMap.remove(id);
 
-        walletMap.remove(id);
+        if (walletRemoved == null){
+            throw new NoSuchElementException("Wallet not found with this ID: "+id);
+        }
     }
 
     @Override
