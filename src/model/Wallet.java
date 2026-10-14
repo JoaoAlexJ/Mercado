@@ -9,11 +9,11 @@ public class Wallet {
     private final UUID idUser;
     private BigDecimal balance;
 
-    public Wallet(UUID id, UUID idUser, BigDecimal balance) {
+    public Wallet(UUID id, UUID idUser) {
 
         this.id = id;
         this.idUser = idUser;
-        this.balance = balance;
+        this.balance = new BigDecimal(0);
 
     }
 

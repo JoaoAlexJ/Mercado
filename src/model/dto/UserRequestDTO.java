@@ -1,7 +1,4 @@
-package model;
-
-import java.util.Objects;
-import java.util.UUID;
+package model.dto;
 
 public record UserRequestDTO(String name, String email, String password) {
 

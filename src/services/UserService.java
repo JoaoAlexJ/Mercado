@@ -1,7 +1,7 @@
 package services;
 
 import model.User;
-import model.UserRequestDTO;
+import model.dto.UserRequestDTO;
 import model.UserType;
 import repository.UserRepository;
 import security.PasswordHasher;
@@ -9,7 +9,6 @@ import security.UserSession;
 
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Objects;
 import java.util.UUID;
 
 public class UserService {
