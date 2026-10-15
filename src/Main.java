@@ -1,13 +1,11 @@
 import Flow.AdmFlow;
 import model.User;
 import model.UserType;
-import repository.ProductRepository;
-import repository.ProductRepositoryInMemory;
-import repository.UserRepository;
-import repository.UserRepositoryInMemory;
+import repository.*;
 import security.UserSession;
 import services.ProductService;
 import services.UserService;
+import services.WalletService;
 
 import java.util.Scanner;
 import java.util.UUID;
@@ -17,10 +15,13 @@ public class Main {
     static void main(String[] args) {
 
         ProductRepository productRepository = new ProductRepositoryInMemory();
+        UserRepository userRepository = new UserRepositoryInMemory();
+        WalletRepository walletRepository = new WalletRepositoryInMemory();
+
+        WalletService walletService = new WalletService(walletRepository, userRepository );
+        UserService userService = new UserService(userRepository, walletService);
         ProductService productService = new ProductService(productRepository);
 
-        UserRepository userRepository = new UserRepositoryInMemory();
-        UserService userService = new UserService(userRepository);
         Scanner scanner = new Scanner(System.in);
 
         AdmFlow admFlow = new AdmFlow(userService, productService, scanner);

@@ -4,6 +4,7 @@ import model.User;
 import model.dto.UserRequestDTO;
 import model.UserType;
 import repository.UserRepository;
+import repository.WalletRepository;
 import security.PasswordHasher;
 import security.UserSession;
 
@@ -14,9 +15,11 @@ import java.util.UUID;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final WalletService walletService;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, WalletService walletService) {
         this.userRepository = userRepository;
+        this.walletService = walletService;
     }
 
     //-------------//
@@ -54,6 +57,8 @@ public class UserService {
                 UserType.CUSTUMER);
 
         userRepository.save(newUser);
+        walletService.walletRegister(newUser.getId());
+
         return newUser;
 
     }
@@ -84,12 +89,6 @@ public class UserService {
     }
 
     public User findById(UUID id){
-
-        boolean isSelf = UserSession.getCurrentUser().getId().equals(id);
-
-        if (!UserSession.isAdm() && !isSelf){
-            throw new SecurityException("Access denied: you can only viw your own profile");
-        }
 
         return userRepository.findByID(id).orElseThrow(() -> new NoSuchElementException("User not found"));
     }
