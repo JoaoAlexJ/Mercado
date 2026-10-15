@@ -140,8 +140,8 @@ public class UserService {
         }
 
 
-        findById(id);
         userRepository.delete(id);
+        walletService.deleteByID(walletService.findByUserID(id).getId());
 
     }
 
@@ -151,7 +151,9 @@ public class UserService {
         }
 
         User user = findByEmail(email);
+
         userRepository.deleteByEmail(email);
+        walletService.deleteByID(walletService.findByUserID(user.getId()).getId());
         return user;
 
     }
