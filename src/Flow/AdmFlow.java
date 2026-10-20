@@ -41,7 +41,7 @@ public class AdmFlow {
         while (runningMain){
 
             Printer.printMainAdmMenu();
-            byte mainChoice = readByte();
+            byte mainChoice = MainFlow.readByte(scanner);
             Printer.lineBreak();
             Printer.line();
 
@@ -57,7 +57,9 @@ public class AdmFlow {
                     runUserMenu();
                     break;
 
-                case 3:
+                case 0:
+
+                    UserSession.logout();
                     runningMain = false;
                     break;
 
@@ -180,7 +182,7 @@ public class AdmFlow {
         while (runningProduct){
 
             Printer.printProductMenuAdm();
-            byte productChoice = readByte();
+            byte productChoice = MainFlow.readByte(scanner);
 
             Printer.lineBreak();
 
@@ -262,6 +264,33 @@ public class AdmFlow {
 
                 case 6:
 
+                    System.out.println("Provide the brand: ");
+                    String brand = scanner.nextLine();
+
+                    productService.findByBrand(brand).forEach(Printer::printProduct);
+
+                    Printer.line();
+                    Printer.lineBreak();
+                    break;
+
+                case 7:
+
+                    System.out.print("Provide the name: ");
+                    String name = scanner.nextLine();
+
+                    try {
+
+                        Printer.printProduct(productService.findByname(name));
+                    }catch (NoSuchElementException e){
+                        System.out.println("Error: "+e.getMessage());
+                    }
+
+                    Printer.line();
+                    Printer.lineBreak();
+                    break;
+
+                case 8:
+
                     System.out.print("Provide ID: ");
 
                     try {
@@ -283,7 +312,7 @@ public class AdmFlow {
                     Printer.line();
                     break;
 
-                case 7:
+                case 9:
 
                     System.out.print("Provide barcode: ");
                     String barcodeDel = scanner.nextLine();
@@ -291,12 +320,12 @@ public class AdmFlow {
                     try {
 
                         Printer.printProduct(productService.deleteByBarcode(barcodeDel));
+                        System.out.println("Product Deleted");
+
                     }catch (NoSuchElementException e){
                         System.err.println("Product not found.");
-                        break;
-                    }
 
-                    System.out.println("Product Deleted");
+                    }
                     Printer.lineBreak();
                     Printer.line();
 
@@ -322,7 +351,7 @@ public class AdmFlow {
         while (runUserMenu){
 
             Printer.printUserMenuAdm();
-            byte choiceUser = readByte();
+            byte choiceUser = MainFlow.readByte(scanner);
 
             switch (choiceUser){
 
@@ -444,14 +473,4 @@ public class AdmFlow {
         }
     }
 
-    //--------------------------------------- UTILITY ANT-CRASH ---------------------------------------
-
-    private byte readByte(){
-
-        try{
-            return Byte.parseByte(scanner.nextLine());
-        }catch (NumberFormatException e) {
-            return -1;
-        }
-    }
 }
