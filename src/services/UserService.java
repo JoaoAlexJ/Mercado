@@ -158,6 +158,44 @@ public class UserService {
 
     }
 
+    public void changePassword(String currentPassword, String newPassword){
+
+        User currentUser = UserSession.getCurrentUser();
+        if (currentUser == null){
+            throw new SecurityException("No session active, please log in");
+        }
+
+
+        if (currentPassword == null || currentPassword.isBlank()){
+            throw new IllegalArgumentException("Current password cannot be empty");
+        }
+
+        if (newPassword == null || newPassword.isBlank()){
+            throw new IllegalArgumentException("newPassword cannot be empty");
+        }
+
+        //------------------//
+
+        if (!PasswordHasher.checkPassword(currentPassword, currentUser.getPassword())){
+            throw new IllegalArgumentException("Current password does't match");
+        }
+
+        if (currentPassword.equals(newPassword)){
+            throw new IllegalArgumentException("The new password must be different from the current one");
+        }
+
+        String newPasswordHash = PasswordHasher.hash(newPassword);
+
+        User userUpdated = new User(currentUser.getId(),
+                currentUser.getName(),
+                currentUser.getEmail(),
+                newPasswordHash,
+                currentUser.getUserType());
+
+        userRepository.save(userUpdated);
+        UserSession.login(userUpdated);
+    }
+
 
 
 

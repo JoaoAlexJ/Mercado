@@ -55,6 +55,18 @@ public class ProductService {
         return productRepository.findByID(id).orElseThrow(()-> new NoSuchElementException("Product not found"));
     }
 
+    public List<Product> findByBrand(String brand){
+        return findAllProducts().stream()
+                .filter(p -> p.getBrand().equalsIgnoreCase(brand))
+                .toList();
+    }
+
+    public Product findByname(String name){
+        return findAllProducts().stream()
+                .filter(p -> p.getBrand().equalsIgnoreCase(name))
+                .findFirst().orElseThrow(() -> new NoSuchElementException("Product not found"));
+    }
+
     public List<Product> findAllProducts(){
 
         if (productRepository.findAll().isEmpty()){
