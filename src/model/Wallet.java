@@ -39,7 +39,7 @@ public class Wallet {
 
         }
 
-        this.balance.add(amount);
+        this.balance = this.balance.add(amount);
     }
 
     public void debit(BigDecimal amount){
@@ -52,6 +52,6 @@ public class Wallet {
             throw new IllegalArgumentException("Insufficient funds");
         }
 
-        this.balance.subtract(amount);
+        this.balance = this.balance.subtract(amount);
     }
 }
