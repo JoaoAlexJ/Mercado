@@ -1,16 +1,16 @@
 package Flow;
 
+import model.Category;
 import model.User;
 import model.Wallet;
 import printer.Printer;
-import repository.WalletRepository;
-import repository.WalletRepositoryInMemory;
 import security.UserSession;
 import services.ProductService;
 import services.UserService;
 import services.WalletService;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.UUID;
@@ -122,8 +122,9 @@ public class CustomerFlow {
                     try {
 
                         productService.findByCategory(category).forEach(Printer::printProduct);
-                    }catch (IllegalArgumentException e){
-                        System.out.println("List is empty.");
+                    }catch (NullPointerException e){
+                        System.out.println("No products found for category: "+category);
+                        System.out.println("Available categories: "+ Arrays.toString(Category.values()));
                     }
 
                     Printer.lineBreak();
@@ -135,7 +136,12 @@ public class CustomerFlow {
                     System.out.print("Provide brand: ");
                     String brand = scanner.nextLine();
 
-                    productService.findByBrand(brand).forEach(Printer::printProduct);
+                    try {
+
+                        productService.findByBrand(brand).forEach(Printer::printProduct);
+                    }catch (NullPointerException e){
+                        System.out.println("No products found for brand: "+brand);
+                    }
 
                     Printer.lineBreak();
                     Printer.line();

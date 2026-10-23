@@ -207,13 +207,11 @@ public class AdmFlow {
                     System.out.print("Provide Category: ");
                     String categoryInput = scanner.nextLine();
 
-                    List<Product> categoryProducts = productService.findByCategory(categoryInput);
-
-                    if (categoryProducts.isEmpty()){
+                    try {
+                        productService.findByCategory(categoryInput).forEach(Printer::printProduct);
+                    }catch (NullPointerException e){
                         System.out.println("No products found for category: "+categoryInput);
                         System.out.println("Available categories: "+ Arrays.toString(Category.values()));
-                    }else {
-                        categoryProducts.forEach(Printer::printProduct);
                     }
 
                     Printer.lineBreak();
