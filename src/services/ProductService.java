@@ -1,15 +1,18 @@
 package services;
 
+import model.Category;
 import security.BarcodeValidator;
 import model.Product;
 import model.ProductRequestDTO;
 import repository.ProductRepository;
 
 import java.util.*;
+import java.util.function.Function;
 
 public class ProductService {
 
-    private ProductRepository productRepository;
+    private final ProductRepository productRepository;
+    private final Function<Product, String> toProductName = Product::getName;
 
     public ProductService(ProductRepository productRepository) {
         this.productRepository = Objects.requireNonNull(productRepository);
@@ -44,7 +47,9 @@ public class ProductService {
 
 
     }
-    //---------------//
+
+    //------------------------- Finds ----------------------------//
+
 
     public Product findProductByBarcode(String barcode){
         return productRepository.findByBarCode(barcode).orElseThrow(()-> new NoSuchElementException("Product not found"));
@@ -54,24 +59,105 @@ public class ProductService {
         return productRepository.findByID(id).orElseThrow(()-> new NoSuchElementException("Product not found"));
     }
 
-    public List<Product> findAllProducts(){
-        return productRepository.findAll();
+    public Product findByname(String name){
+        return findAllProducts().stream()
+                .filter(p -> p.getBrand().equalsIgnoreCase(name))
+                .findFirst().orElseThrow(() -> new NoSuchElementException("Product not found"));
     }
 
-    public void deleteByBarcode(String barcode){
+    //------------------------- Find lists ----------------------------//
+    public List<Product> findByBrand(String brand){
+        return findAllProducts().stream()
+                .filter(p -> p.getBrand().equalsIgnoreCase(brand))
+                .sorted(Comparator.comparing(toProductName))
+                .toList();
+    }
 
-        if (findProductByBarcode(barcode) == null){
+    public List<Product> findAllProducts(){
+
+        if (productRepository.findAll().isEmpty()){
+            System.out.println("No products registered in the catalog");
+        }
+
+        return productRepository.findAll().stream()
+                .sorted(Comparator.comparing(toProductName))
+                .toList();
+    }
+
+    public List<Product> findByCategory(String category){
+
+        if (category == null || category.isBlank()){
+            return List.of();
+        }
+
+        final Category targetCategory;
+
+        try {
+
+            targetCategory = Category.valueOf(category.trim().toUpperCase());
+        }catch (IllegalArgumentException e){
+            return List.of();
+        }
+
+        return findAllProducts().stream()
+                .filter(p -> p.getCategory() == targetCategory)
+                .sorted(Comparator.comparing(toProductName))
+                .toList();
+    }
+
+    //------------------------- Find sorted by price ----------------------------//
+
+    public List<Product> sortedByPrice(List<Product> list, SortOrder sortOrder){
+
+        if (sortOrder == null){
+            throw new IllegalArgumentException("SortOrder cannot be null.");
+        }
+
+        if (list == null){
+            throw new IllegalArgumentException("List cannot be null");
+        }
+
+        if (list.isEmpty()){
+            return List.of();
+        }
+
+
+        Comparator<Product> priceComparator = Comparator.comparing(Product::getPrice);
+
+        if (sortOrder == SortOrder.DESC){
+            priceComparator = priceComparator.reversed();
+        }
+
+        return list.stream().sorted(priceComparator).toList();
+    }
+
+    public List<Product> findAllProductsByPrice(SortOrder sortOrder){
+        return sortedByPrice(findAllProducts(), sortOrder);
+    }
+
+    //------------------------- Delete ----------------------------//
+
+    public Product deleteByBarcode(String barcode){
+
+        Product p = findProductByBarcode(barcode);
+
+        if (p == null){
             throw new NoSuchElementException("Product not found");
         }
         productRepository.deleteByBarCode(barcode);
+        return p;
     }
 
-    public void deleteById(UUID id){
+    public Product deleteById(UUID id){
 
-        if (findProductById(id) == null){
+        Product p = findProductById(id);
+
+        if (p == null){
             throw new NoSuchElementException("Product not found");
         }
         productRepository.delete(id);
+        return p;
+
     }
 
 }
