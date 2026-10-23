@@ -8,14 +8,17 @@ import repository.WalletRepository;
 import security.PasswordHasher;
 import security.UserSession;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
+import java.util.function.Function;
 
 public class UserService {
 
     private final UserRepository userRepository;
     private final WalletService walletService;
+    private final Function<User, String> toUserName = User::getName;
 
     public UserService(UserRepository userRepository, WalletService walletService) {
         this.userRepository = userRepository;
@@ -114,13 +117,16 @@ public class UserService {
             System.out.println("no registered users");
         }
 
-        return userRepository.findAll();
+        return userRepository.findAll().stream()
+                .sorted(Comparator.comparing(toUserName))
+                .toList();
     }
 
     public List<User> findAllAdm(){
 
         return findAllUsers().stream()
                 .filter(u -> u.getUserType().equals(UserType.ADM))
+                .sorted(Comparator.comparing(toUserName))
                 .toList();
 
     }
@@ -129,6 +135,7 @@ public class UserService {
 
         return findAllUsers().stream()
                 .filter(u -> u.getUserType().equals(UserType.CUSTUMER))
+                .sorted(Comparator.comparing(toUserName))
                 .toList();
 
     }
@@ -157,6 +164,8 @@ public class UserService {
         return user;
 
     }
+
+    //------------------------------------------------------//
 
     public void changePassword(String currentPassword, String newPassword){
 

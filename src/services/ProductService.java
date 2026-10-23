@@ -7,10 +7,12 @@ import model.dto.ProductRequestDTO;
 import repository.ProductRepository;
 
 import java.util.*;
+import java.util.function.Function;
 
 public class ProductService {
 
-    private ProductRepository productRepository;
+    private final ProductRepository productRepository;
+    private final Function<Product, String> toProductName = Product::getName;
 
     public ProductService(ProductRepository productRepository) {
         this.productRepository = Objects.requireNonNull(productRepository);
@@ -58,6 +60,7 @@ public class ProductService {
     public List<Product> findByBrand(String brand){
         return findAllProducts().stream()
                 .filter(p -> p.getBrand().equalsIgnoreCase(brand))
+                .sorted(Comparator.comparing(toProductName))
                 .toList();
     }
 
@@ -73,7 +76,9 @@ public class ProductService {
             System.out.println("No products registered in the catalog");
         }
 
-        return productRepository.findAll();
+        return productRepository.findAll().stream()
+                .sorted(Comparator.comparing(toProductName))
+                .toList();
     }
 
     public List<Product> findByCategory(String category){
@@ -93,6 +98,7 @@ public class ProductService {
 
         return findAllProducts().stream()
                 .filter(p -> p.getCategory() == targetCategory)
+                .sorted(Comparator.comparing(toProductName))
                 .toList();
     }
 

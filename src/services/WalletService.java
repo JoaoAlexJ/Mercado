@@ -6,10 +6,7 @@ import repository.UserRepository;
 import repository.WalletRepository;
 
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public class WalletService {
 
