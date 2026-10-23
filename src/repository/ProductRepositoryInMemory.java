@@ -11,6 +11,10 @@ public class ProductRepositoryInMemory implements ProductRepository {
     @Override
     public Optional<Product> findByBarCode(String barcode) {
 
+        if (barcode == null || barcode.isBlank()){
+            return Optional.empty();
+        }
+
         return productMap.values().stream()
                 .filter(product -> product.getBarCode().equalsIgnoreCase(barcode))
                 .findFirst();
@@ -20,14 +24,13 @@ public class ProductRepositoryInMemory implements ProductRepository {
     public void deleteByBarCode(String barcode) {
 
         productMap.values().removeIf(p -> p.getBarCode().equalsIgnoreCase(barcode));
-
     }
 
     @Override
     public void save(Product obj) {
 
         if (obj == null){
-            throw new NullPointerException("Não é possível cadastrar um produto nulo.");
+            throw new NullPointerException("Invalid product.");
         }
 
         productMap.put(obj.getId(), obj);
@@ -36,7 +39,11 @@ public class ProductRepositoryInMemory implements ProductRepository {
     @Override
     public void delete(UUID id) {
 
-        productMap.remove(id);
+        Product productRemoved = productMap.remove(id);
+
+        if (productRemoved == null){
+            throw new NoSuchElementException("Product not found with this ID: "+id);
+        }
     }
 
     @Override

@@ -1,9 +1,10 @@
 package services;
 
 import model.Category;
+import model.SortOrder;
 import security.BarcodeValidator;
 import model.Product;
-import model.ProductRequestDTO;
+import model.dto.ProductRequestDTO;
 import repository.ProductRepository;
 
 import java.util.*;

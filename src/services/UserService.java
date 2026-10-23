@@ -1,23 +1,28 @@
 package services;
 
 import model.User;
-import model.UserRequestDTO;
+import model.dto.UserRequestDTO;
 import model.UserType;
 import repository.UserRepository;
+import repository.WalletRepository;
 import security.PasswordHasher;
 import security.UserSession;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Objects;
 import java.util.UUID;
+import java.util.function.Function;
 
 public class UserService {
 
     private final UserRepository userRepository;
+    private final WalletService walletService;
+    private final Function<User, String> toUserName = User::getName;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, WalletService walletService) {
         this.userRepository = userRepository;
+        this.walletService = walletService;
     }
 
     //-------------//
@@ -52,9 +57,11 @@ public class UserService {
                 userRequestDTO.name(),
                 userRequestDTO.email(),
                 hashPassword,
-                UserType.CLIENTE);
+                UserType.CUSTUMER);
 
         userRepository.save(newUser);
+        walletService.walletRegister(newUser.getId());
+
         return newUser;
 
     }
@@ -70,11 +77,13 @@ public class UserService {
         }
 
         UUID id = UUID.randomUUID();
+        String hashpassword = PasswordHasher.hash(userRequestDTO.password());
+
         User newUser = new User(
                 id,
                 userRequestDTO.name(),
                 userRequestDTO.email(),
-                userRequestDTO.password(),
+                hashpassword,
                 UserType.ADM
         );
 
@@ -83,12 +92,6 @@ public class UserService {
     }
 
     public User findById(UUID id){
-
-        boolean isSelf = UserSession.getCurrentUser().getId().equals(id);
-
-        if (!UserSession.isAdm() && !isSelf){
-            throw new SecurityException("Access denied: you can only viw your own profile");
-        }
 
         return userRepository.findByID(id).orElseThrow(() -> new NoSuchElementException("User not found"));
     }
@@ -111,10 +114,30 @@ public class UserService {
         }
 
         if (userRepository.findAll().isEmpty()){
-            System.err.println("no registered users");
+            System.out.println("no registered users");
         }
 
-        return userRepository.findAll();
+        return userRepository.findAll().stream()
+                .sorted(Comparator.comparing(toUserName))
+                .toList();
+    }
+
+    public List<User> findAllAdm(){
+
+        return findAllUsers().stream()
+                .filter(u -> u.getUserType().equals(UserType.ADM))
+                .sorted(Comparator.comparing(toUserName))
+                .toList();
+
+    }
+
+    public List<User> findAllCustomers(){
+
+        return findAllUsers().stream()
+                .filter(u -> u.getUserType().equals(UserType.CUSTUMER))
+                .sorted(Comparator.comparing(toUserName))
+                .toList();
+
     }
 
     public void deleteById(UUID id){
@@ -124,18 +147,62 @@ public class UserService {
         }
 
 
-        findById(id);
         userRepository.delete(id);
+        walletService.deleteByID(walletService.findByUserID(id).getId());
 
     }
 
-    public void deleteByEmail(String email){
+    public User deleteByEmail(String email){
         if (!UserSession.isAdm()){
             throw new SecurityException("Only administrators can do this");
         }
 
-        findByEmail(email);
+        User user = findByEmail(email);
+
         userRepository.deleteByEmail(email);
+        walletService.deleteByID(walletService.findByUserID(user.getId()).getId());
+        return user;
+
+    }
+
+    //------------------------------------------------------//
+
+    public void changePassword(String currentPassword, String newPassword){
+
+        User currentUser = UserSession.getCurrentUser();
+        if (currentUser == null){
+            throw new SecurityException("No session active, please log in");
+        }
+
+
+        if (currentPassword == null || currentPassword.isBlank()){
+            throw new IllegalArgumentException("Current password cannot be empty");
+        }
+
+        if (newPassword == null || newPassword.isBlank()){
+            throw new IllegalArgumentException("newPassword cannot be empty");
+        }
+
+        //------------------//
+
+        if (!PasswordHasher.checkPassword(currentPassword, currentUser.getPassword())){
+            throw new IllegalArgumentException("Current password does't match");
+        }
+
+        if (currentPassword.equals(newPassword)){
+            throw new IllegalArgumentException("The new password must be different from the current one");
+        }
+
+        String newPasswordHash = PasswordHasher.hash(newPassword);
+
+        User userUpdated = new User(currentUser.getId(),
+                currentUser.getName(),
+                currentUser.getEmail(),
+                newPasswordHash,
+                currentUser.getUserType());
+
+        userRepository.save(userUpdated);
+        UserSession.login(userUpdated);
     }
 
 
