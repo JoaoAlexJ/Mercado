@@ -119,7 +119,12 @@ public class CustomerFlow {
                     System.out.print("Provide Category: ");
                     String category = scanner.nextLine();
 
-                    productService.findByCategory(category).forEach(Printer::printProduct);
+                    try {
+
+                        productService.findByCategory(category).forEach(Printer::printProduct);
+                    }catch (IllegalArgumentException e){
+                        System.out.println("List is empty.");
+                    }
 
                     Printer.lineBreak();
                     Printer.line();
