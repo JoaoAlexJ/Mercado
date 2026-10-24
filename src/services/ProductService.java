@@ -5,7 +5,7 @@ import model.SortOrder;
 import security.BarcodeValidator;
 import model.Product;
 import model.dto.ProductRequestDTO;
-import repository.ProductRepository;
+import repository.Interfaces.ProductRepository;
 
 import java.util.*;
 import java.util.function.Function;

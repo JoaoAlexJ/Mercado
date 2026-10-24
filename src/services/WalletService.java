@@ -1,9 +1,8 @@
 package services;
 
-import model.User;
 import model.Wallet;
-import repository.UserRepository;
-import repository.WalletRepository;
+import repository.Interfaces.UserRepository;
+import repository.Interfaces.WalletRepository;
 
 import java.math.BigDecimal;
 import java.util.*;

@@ -1,10 +1,11 @@
 package repository;
 
 import model.User;
+import repository.Interfaces.UserRepository;
 
 import java.util.*;
 
-public class UserRepositoryInMemory implements UserRepository{
+public class UserRepositoryInMemory implements UserRepository {
 
     private final Map<UUID, User> userMap = new HashMap<>();
 

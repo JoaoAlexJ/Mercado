@@ -1,10 +1,11 @@
 package repository;
 
 import model.Wallet;
+import repository.Interfaces.WalletRepository;
 
 import java.util.*;
 
-public class WalletRepositoryInMemory implements WalletRepository{
+public class WalletRepositoryInMemory implements WalletRepository {
 
     private final Map<UUID, Wallet> walletMap = new HashMap<>();
 

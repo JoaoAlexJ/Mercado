@@ -3,8 +3,7 @@ package services;
 import model.User;
 import model.dto.UserRequestDTO;
 import model.UserType;
-import repository.UserRepository;
-import repository.WalletRepository;
+import repository.Interfaces.UserRepository;
 import security.PasswordHasher;
 import security.UserSession;
 
