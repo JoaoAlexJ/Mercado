@@ -1,4 +1,6 @@
-package model;
+package model.sale;
+
+import model.Product.Product;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -21,10 +23,31 @@ public class OrderIten {
         this.quantity = quantity;
     }
 
+    //------------------------------------//
+
     public BigDecimal getSubtotal(){
         return this.unitPrice.multiply(BigDecimal.valueOf(quantity));
     }
 
+
+    public void decreaseQuantity(int quantityRemove){
+        if (quantityRemove <= 0 || quantityRemove > this.quantity){
+            throw new IllegalArgumentException("Invalid quantity");
+        }
+
+        this.quantity -= quantityRemove;
+    }
+
+    public void increaseQuantity(int quantity){
+        if (quantity <= 0){
+            throw new IllegalArgumentException("Invalid quantity");
+        }
+
+        this.quantity += quantity;
+    }
+
+
+    //------------------------------------//
 
     public String getBarcode() {
         return barcode;

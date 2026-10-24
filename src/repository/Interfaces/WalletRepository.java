@@ -1,6 +1,6 @@
 package repository.Interfaces;
 
-import model.Wallet;
+import model.User.Wallet;
 
 import java.util.Optional;
 import java.util.UUID;

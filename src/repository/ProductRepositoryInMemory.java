@@ -1,6 +1,6 @@
 package repository;
 
-import model.Product;
+import model.Product.Product;
 import repository.Interfaces.ProductRepository;
 
 import java.util.*;

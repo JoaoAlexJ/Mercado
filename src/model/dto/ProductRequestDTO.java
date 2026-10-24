@@ -1,6 +1,6 @@
 package model.dto;
 
-import model.Category;
+import model.Product.Category;
 
 import java.math.BigDecimal;
 

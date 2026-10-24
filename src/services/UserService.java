@@ -1,8 +1,8 @@
 package services;
 
-import model.User;
+import model.User.User;
 import model.dto.UserRequestDTO;
-import model.UserType;
+import model.User.UserType;
 import repository.Interfaces.UserRepository;
 import security.PasswordHasher;
 import security.UserSession;

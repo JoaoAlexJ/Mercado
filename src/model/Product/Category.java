@@ -1,4 +1,4 @@
-package model;
+package model.Product;
 
 public enum Category {
 

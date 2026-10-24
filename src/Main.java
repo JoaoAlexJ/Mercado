@@ -1,6 +1,6 @@
 import Flow.AdmFlow;
-import model.User;
-import model.UserType;
+import model.User.User;
+import model.User.UserType;
 import repository.*;
 import repository.Interfaces.ProductRepository;
 import repository.Interfaces.UserRepository;
@@ -10,6 +10,8 @@ import services.ProductService;
 import services.UserService;
 import services.WalletService;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 import java.util.UUID;
 
@@ -32,7 +34,17 @@ public class Main {
         User userAdm = new User(UUID.randomUUID(), "joao Alexandre", "joao@gmail.com", "123456", UserType.ADM);
         UserSession.login(userAdm);
 
-        admFlow.start();
+
+
+        System.out.println(new ArrayList<>(List.of(
+                "ola",
+                "Jesus",
+                "Socorro",
+                "O Senhor é soberano",
+                "Eu preciso da sua ajuda",
+                "Nao consigo vencer"
+        )));
+
 
     }
 }

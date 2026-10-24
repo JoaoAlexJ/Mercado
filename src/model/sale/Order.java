@@ -1,13 +1,13 @@
-package sale;
+package model.sale;
 
 import Exceptions.SaleException;
-import model.OrderIten;
-import model.User;
+import model.User.User;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 public class Order {
@@ -17,46 +17,22 @@ public class Order {
     private LocalDate date;
     private BigDecimal value;
     private OrderStatus status;
-    private List<OrderIten> cart;
+    private List<OrderIten> itens;
 
-    public Order(UUID id, User customer, List<OrderIten> cart) {
+    public Order(UUID id, User customer, List<OrderIten> itens) {
+
+        if (itens == null || itens.isEmpty()){
+            throw new SaleException("The cart contains no product");
+        }
+
         this.id = id;
         this.custumer = customer;
         this.date = LocalDate.now();
-        this.cart = cart != null ? new ArrayList<>(cart) : new ArrayList<>();
+        this.itens = new ArrayList<>(itens);
         this.status = OrderStatus.OPEN;
-
-        calculateTotalValue();
-    }
-
-    public void calculateTotalValue(){
-
-        this.value = cart.stream()
+        this.value = itens.stream()
                 .map(OrderIten::getSubtotal)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
-
-    public void addProduct(OrderIten p){
-        if (status != OrderStatus.OPEN){
-            throw new SaleException("Cannot modify an order that is not OPEN");
-        }
-
-        if (p == null){
-            throw new IllegalArgumentException("Product cannot be null.");
-        }
-
-        cart.add(p);
-        calculateTotalValue();
-    }
-
-    public void removeProductByBarcode(String barcode){
-
-        if (status != OrderStatus.OPEN){
-            throw new SaleException("Cannot modify an order that is not OPEN");
-        }
-
-        cart.removeIf(o -> o.getBarcode().equals(barcode));
-        calculateTotalValue();
+                .reduce( BigDecimal.ZERO, BigDecimal::add);
     }
 
     //--------------------//
@@ -99,7 +75,7 @@ public class Order {
         return value;
     }
 
-    public List<OrderIten> getCart() {
-        return new ArrayList<>(cart);
+    public List<OrderIten> getItens() {
+        return new ArrayList<>(itens);
     }
 }

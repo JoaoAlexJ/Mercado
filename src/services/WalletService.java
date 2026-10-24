@@ -1,6 +1,6 @@
 package services;
 
-import model.Wallet;
+import model.User.Wallet;
 import repository.Interfaces.UserRepository;
 import repository.Interfaces.WalletRepository;
 

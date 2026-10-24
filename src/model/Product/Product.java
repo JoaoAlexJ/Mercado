@@ -1,4 +1,4 @@
-package model;
+package model.Product;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -25,6 +25,23 @@ public class Product {
         this.stock = stock;
     }
 
+    public void reduceStock(int quantity){
+        if (quantity <= 0 || quantity > this.stock){
+            throw new IllegalArgumentException("quantity invalid");
+        }
+
+        this.stock -= quantity;
+    }
+
+    public void increaseStock(int quantity){
+        if (quantity <= 0 ){
+            throw new IllegalArgumentException("quantity invalid");
+        }
+
+        this.stock += quantity;
+    }
+
+    //---------------------//
 
     public UUID getId() {
         return id;

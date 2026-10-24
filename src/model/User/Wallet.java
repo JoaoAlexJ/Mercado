@@ -1,4 +1,4 @@
-package model;
+package model.User;
 
 import java.math.BigDecimal;
 import java.util.UUID;

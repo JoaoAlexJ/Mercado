@@ -1,6 +1,6 @@
 package repository;
 
-import model.Wallet;
+import model.User.Wallet;
 import repository.Interfaces.WalletRepository;
 
 import java.util.*;

@@ -1,13 +1,14 @@
 package repository.Interfaces;
 
-import model.User;
-import sale.Order;
+import model.User.User;
+import model.sale.Order;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface OrderRepository extends Repository<Order>{
 
-    List<Order> findAllByCustomer(User custumer);
+    List<Order> findAllByCustomer(UUID id);
 
 
 }

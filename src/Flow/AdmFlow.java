@@ -1,6 +1,7 @@
 package Flow;
 
-import model.*;
+import model.Product.Category;
+import model.Product.Product;
 import model.dto.ProductRequestDTO;
 import model.dto.UserRequestDTO;
 import printer.Printer;

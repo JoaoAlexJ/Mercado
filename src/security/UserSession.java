@@ -1,7 +1,7 @@
 package security;
 
-import model.User;
-import model.UserType;
+import model.User.User;
+import model.User.UserType;
 
 import java.util.Objects;
 

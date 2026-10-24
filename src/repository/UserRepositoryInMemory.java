@@ -1,6 +1,6 @@
 package repository;
 
-import model.User;
+import model.User.User;
 import repository.Interfaces.UserRepository;
 
 import java.util.*;

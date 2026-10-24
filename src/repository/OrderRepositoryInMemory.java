@@ -1,9 +1,8 @@
 package repository;
 
-import model.User;
+import model.User.User;
 import repository.Interfaces.OrderRepository;
-import repository.Interfaces.Repository;
-import sale.Order;
+import model.sale.Order;
 
 import java.util.*;
 
@@ -23,6 +22,9 @@ public class OrderRepositoryInMemory implements OrderRepository {
     @Override
     public void delete(UUID id) {
 
+        if (findByID(id).isEmpty()){
+            throw new NoSuchElementException("Order no found");
+        }
         map.remove(id);
     }
 
@@ -39,10 +41,10 @@ public class OrderRepositoryInMemory implements OrderRepository {
     }
 
     @Override
-    public List<Order> findAllByCustomer(User custumer) {
+    public List<Order> findAllByCustomer(UUID id) {
 
         return map.values().stream()
-                .filter(o -> o.getCustumer().getId().equals(custumer.getId()))
+                .filter(o -> o.getCustumer().getId().equals(id))
                 .toList();
     }
 }

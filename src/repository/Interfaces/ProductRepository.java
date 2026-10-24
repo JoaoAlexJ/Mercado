@@ -1,6 +1,6 @@
 package repository.Interfaces;
 
-import model.Product;
+import model.Product.Product;
 
 import java.util.Optional;
 

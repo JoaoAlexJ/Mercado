@@ -1,8 +1,9 @@
 package Flow;
 
-import model.Category;
-import model.User;
-import model.Wallet;
+import model.Product.Category;
+import model.User.User;
+import model.User.Wallet;
+import model.sale.Cart;
 import printer.Printer;
 import security.UserSession;
 import services.ProductService;
@@ -22,11 +23,18 @@ public class CustomerFlow {
     private final WalletService walletService;
     private final Scanner scanner;
 
-    public CustomerFlow(UserService userService, ProductService productService, Scanner scanner, WalletService walletService) {
+    private final Cart cart;
+
+    public CustomerFlow(UserService userService, ProductService productService, Scanner scanner, WalletService walletService, Cart cart) {
         this.userService = userService;
         this.productService = productService;
         this.scanner = scanner;
         this.walletService = walletService;
+        this.cart = cart;
+    }
+
+    public Cart getCart() {
+        return cart;
     }
 
     public void start(){

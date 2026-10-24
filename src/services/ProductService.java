@@ -1,9 +1,8 @@
 package services;
 
-import model.Category;
-import model.SortOrder;
+import model.Product.Category;
 import security.BarcodeValidator;
-import model.Product;
+import model.Product.Product;
 import model.dto.ProductRequestDTO;
 import repository.Interfaces.ProductRepository;
 
@@ -17,6 +16,16 @@ public class ProductService {
 
     public ProductService(ProductRepository productRepository) {
         this.productRepository = Objects.requireNonNull(productRepository);
+    }
+
+    public void reduceStock(UUID id, int quantity){
+
+        findProductById(id).reduceStock(quantity);
+    }
+
+    public void increaseStrock(UUID id, int quantity){
+
+        findProductById(id).increaseStock(quantity);
     }
 
     //-----------------//

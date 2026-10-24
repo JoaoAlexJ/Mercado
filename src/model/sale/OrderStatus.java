@@ -1,4 +1,4 @@
-package sale;
+package model.sale;
 
 public enum OrderStatus {
 

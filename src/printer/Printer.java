@@ -1,10 +1,8 @@
 package printer;
 
-import model.Product;
-import model.User;
-import model.Wallet;
-
-import java.util.function.Predicate;
+import model.Product.Product;
+import model.User.User;
+import model.User.Wallet;
 
 public class Printer {
 
