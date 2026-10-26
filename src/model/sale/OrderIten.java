@@ -12,6 +12,7 @@ public class OrderIten {
     private final String nameProduct;
     private final BigDecimal unitPrice;
     private final String barcode;
+    private final String brand;
     private int quantity;
 
     public OrderIten(Product product, int quantity) {
@@ -20,6 +21,7 @@ public class OrderIten {
         this.nameProduct = product.getName();
         this.unitPrice = product.getPrice();
         this.barcode = product.getBarCode();
+        this.brand = product.getBrand();
         this.quantity = quantity;
     }
 
@@ -71,5 +73,9 @@ public class OrderIten {
 
     public int getQuantity() {
         return quantity;
+    }
+
+    public String getBrand() {
+        return brand;
     }
 }

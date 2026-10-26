@@ -3,6 +3,7 @@ package services;
 import model.User.User;
 import model.dto.UserRequestDTO;
 import model.User.UserType;
+import printer.Printer;
 import repository.Interfaces.UserRepository;
 import security.PasswordHasher;
 import security.UserSession;
@@ -44,8 +45,19 @@ public class UserService {
 
     public User registerCustomer(UserRequestDTO userRequestDTO){
 
+        String regexEmail = ("^[\\w.%]+@[\\w.]+\\.[a-z]{2,}$");
+        String regexPassword = ("(?=.*[a-z])(?=.*[A-Z])(?=.*[\\d]).{8,12}");
+
         if (userRepository.findByEmail(userRequestDTO.email()).isPresent()){
             throw new IllegalArgumentException("Email already register in system");
+        }
+
+        if (!userRequestDTO.email().matches(regexEmail)){
+            throw new IllegalArgumentException("Invalid email format");
+        }
+
+        if(!userRequestDTO.password().matches(regexPassword)){
+            throw new IllegalArgumentException("Invalid password. Must contains uppercase, lowercase, numbers and be 8-12 characters long");
         }
 
         UUID id = UUID.randomUUID();
@@ -67,12 +79,23 @@ public class UserService {
 
     public User registerAdm(UserRequestDTO userRequestDTO){
 
+        String regexEmail = ("^[\\w.%]+@[\\w.]+\\.[a-z]{2,}$");
+        String regexPassword = ("(?=.*[a-z])(?=.*[A-Z])(?=.*[\\d]).{8,12}");
+
         if (userRepository.findByEmail(userRequestDTO.email()).isPresent()){
             throw new IllegalArgumentException("Email already register in system");
         }
 
         if (!UserSession.isAdm()){
             throw new SecurityException("Only administrators can creat new Administrators");
+        }
+
+        if (!userRequestDTO.email().matches(regexEmail)){
+            throw new IllegalArgumentException("Invalid email format");
+        }
+
+        if(userRequestDTO.password().matches(regexPassword)){
+            throw new IllegalArgumentException("Invalid password. Must contains uppercase, lowercase, numbers and be 8-12 characters long");
         }
 
         UUID id = UUID.randomUUID();
@@ -167,6 +190,8 @@ public class UserService {
     //------------------------------------------------------//
 
     public void changePassword(String currentPassword, String newPassword){
+        String regexPassword = ("(?=.*[a-z])(?=.*[A-Z])(?=.*[\\d]).{8,12}");
+
 
         User currentUser = UserSession.getCurrentUser();
         if (currentUser == null){
@@ -182,6 +207,9 @@ public class UserService {
             throw new IllegalArgumentException("newPassword cannot be empty");
         }
 
+        if(!newPassword.matches(regexPassword)){
+            throw new IllegalArgumentException("Invalid password. Must contains uppercase, lowercase, numbers and be 8-12 characters long");
+        }
         //------------------//
 
         if (!PasswordHasher.checkPassword(currentPassword, currentUser.getPassword())){

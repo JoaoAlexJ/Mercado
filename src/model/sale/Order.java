@@ -38,8 +38,8 @@ public class Order {
     //--------------------//
 
     public void cancelOrder(){
-        if (status != OrderStatus.OPEN){
-            throw new SaleException("Only open orders can be cancelled");
+        if (status == OrderStatus.CANCELED){
+            throw new SaleException("Only open or paid orders can be cancelled");
         }
 
         this.status = OrderStatus.CANCELED;

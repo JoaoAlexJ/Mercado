@@ -2,13 +2,19 @@ package Flow;
 
 import model.Product.Category;
 import model.Product.Product;
+import model.Ultility.FindOrdersByStatus;
 import model.dto.ProductRequestDTO;
 import model.dto.UserRequestDTO;
+import model.sale.Order;
+import model.sale.OrderStatus;
 import printer.Printer;
 import security.UserSession;
+import services.OrderService;
 import services.ProductService;
+import services.SortOrder;
 import services.UserService;
 
+import javax.print.attribute.standard.PrinterLocation;
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -17,11 +23,13 @@ public class AdmFlow {
     private final UserService userService;
     private final ProductService productService;
     private final Scanner scanner;
+    private final OrderService orderService;
 
-    public AdmFlow(UserService userService, ProductService productService, Scanner scanner) {
+    public AdmFlow(UserService userService, ProductService productService, Scanner scanner, OrderService orderService) {
         this.userService = userService;
         this.productService = productService;
         this.scanner = scanner;
+        this.orderService = orderService;
     }
 
     //--------------------//
@@ -56,6 +64,11 @@ public class AdmFlow {
                 case 2:
 
                     runUserMenu();
+                    break;
+
+                case 3:
+
+                    runOrdersMenu();
                     break;
 
                 case 0:
@@ -125,9 +138,9 @@ public class AdmFlow {
             Printer.printProduct(p);
 
         }catch (NumberFormatException e ) {
-            System.err.println("Invalid numeric value for price or stock.");
+            System.out.println("Invalid numeric value for price or stock.");
         }catch (IllegalArgumentException e ){
-            System.err.println("Validation failed: "+e.getMessage());
+            System.out.println("Validation failed: "+e.getMessage());
         }
 
     }
@@ -177,6 +190,80 @@ public class AdmFlow {
 
     //--------------------------------------- Running Menu ---------------------------------------
 
+    private void runOrdersMenu(){
+        boolean runOrders = true;
+        while (runOrders){
+
+            System.out.println("----------- \uD83D\uDCE6 Orders -----------");
+            System.out.println("1 - find order by ID");
+            System.out.println("2 - find customers orders");
+            System.out.println("3 - find all orders");
+            System.out.println("4 - cancel order");
+            System.out.println("0 - back");
+            System.out.print("-> ");
+            byte choiceOrders = MainFlow.readByte(scanner);
+
+            switch (choiceOrders){
+
+                case 1 -> {
+
+                    System.out.print("Enter ID: ");
+                    String id = scanner.nextLine();
+
+                    try {
+
+                        Printer.printOrder(orderService.findById(UUID.fromString(id)));
+
+                    }catch (IllegalArgumentException e){
+                        System.out.println(e.getMessage());
+                    }
+                }
+                case 2 -> {
+
+                    System.out.print("Enter the customer ID: ");
+                    String id = scanner.nextLine();
+
+                    try {
+
+                        FindOrdersByStatus.byIdCustomer(UUID.fromString(id), scanner, orderService);
+
+                    }catch (IllegalArgumentException | NoSuchElementException e){
+                        System.out.println(e.getMessage());
+                    }
+                }
+
+                case 3 -> {
+
+                    try {
+
+                        FindOrdersByStatus.inMemory(scanner, orderService);
+                    }catch (IllegalArgumentException | NoSuchElementException e){
+                        System.out.println(e.getMessage());
+                    }
+
+                }
+                case 4 -> {
+
+                    System.out.print("Enter order ID: ");
+                    String id = scanner.nextLine();
+
+                    try {
+                        orderService.cancelOrder(UUID.fromString(id));
+                    }catch (IllegalArgumentException | NoSuchElementException e ){
+                        System.out.println(e.getMessage());
+                    }
+                }
+                case 0 -> runOrders = false;
+                default -> System.out.println("Invalid choice");
+
+            }
+
+        }
+
+
+
+    }
+
     private void runProductMenu(){
 
         boolean runningProduct = true;
@@ -184,8 +271,6 @@ public class AdmFlow {
 
             Printer.printProductMenuAdm();
             byte productChoice = MainFlow.readByte(scanner);
-
-            Printer.lineBreak();
 
             switch (productChoice){
 
@@ -199,17 +284,21 @@ public class AdmFlow {
 
                 case 2:
 
-                    productService.findAllProducts().forEach(Printer::printProduct);
+                    Printer.line();
+                    MainFlow.menuSortPrice(productService.findAllProducts(), productService, scanner);
                     Printer.lineBreak();
                     break;
 
                 case 3:
 
+                    Printer.line();
                     System.out.print("Provide Category: ");
                     String categoryInput = scanner.nextLine();
 
                     try {
-                        productService.findByCategory(categoryInput).forEach(Printer::printProduct);
+
+                        MainFlow.menuSortPrice(productService.findByCategory(categoryInput), productService, scanner);
+
                     }catch (NullPointerException e){
                         System.out.println("No products found for category: "+categoryInput);
                         System.out.println("Available categories: "+ Arrays.toString(Category.values()));
@@ -245,6 +334,7 @@ public class AdmFlow {
 
                 case 5:
 
+                    Printer.line();
                     System.out.print("Provide barcode: ");
                     String barcodeInput = scanner.nextLine();
 
@@ -263,10 +353,11 @@ public class AdmFlow {
 
                 case 6:
 
+                    Printer.line();
                     System.out.println("Provide the brand: ");
                     String brand = scanner.nextLine();
 
-                    productService.findByBrand(brand).forEach(Printer::printProduct);
+                    MainFlow.menuSortPrice(productService.findByBrand(brand), productService, scanner);
 
                     Printer.line();
                     Printer.lineBreak();
@@ -274,6 +365,7 @@ public class AdmFlow {
 
                 case 7:
 
+                    Printer.line();
                     System.out.print("Provide the name: ");
                     String name = scanner.nextLine();
 
@@ -290,6 +382,7 @@ public class AdmFlow {
 
                 case 8:
 
+                    Printer.line();
                     System.out.print("Provide ID: ");
 
                     try {
@@ -313,6 +406,7 @@ public class AdmFlow {
 
                 case 9:
 
+                    Printer.line();
                     System.out.print("Provide barcode: ");
                     String barcodeDel = scanner.nextLine();
 
@@ -344,7 +438,7 @@ public class AdmFlow {
         }
     }
 
-    public void runUserMenu(){
+    private void runUserMenu(){
 
         boolean runUserMenu = true;
         while (runUserMenu){
@@ -391,11 +485,11 @@ public class AdmFlow {
                         Printer.line();
 
                     }catch (IllegalArgumentException e ){
-                        System.err.println("Invalid ID.");
+                        System.out.println("Invalid ID.");
 
 
                     }catch (NoSuchElementException e){
-                        System.err.println("User not found: "+e.getMessage());
+                        System.out.println("User not found: "+e.getMessage());
 
                     }
 
@@ -471,5 +565,11 @@ public class AdmFlow {
 
         }
     }
+
+    //---------------------------- Utility ----------------------------//
+
+
+
+
 
 }

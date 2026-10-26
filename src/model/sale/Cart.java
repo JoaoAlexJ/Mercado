@@ -17,13 +17,11 @@ public class Cart {
     private BigDecimal value;
     private List<OrderIten> itens;
 
-    private ProductService productService;
 
-    public Cart(ProductService productService) {
+    public Cart() {
 
         this.customer = UserSession.getCurrentUser();
         this.itens = new ArrayList<>();
-        this.productService = productService;
         calculateTotalValue();
 
     }
@@ -89,6 +87,18 @@ public class Cart {
     public void clearCart(){
         this.itens.clear();
         this.value = BigDecimal.ZERO;
+    }
+
+    public void setCustomer(User customer) {
+       if (customer == null){
+           throw new IllegalArgumentException("Invalid Customer.");
+       }
+
+        if(customer != UserSession.getCurrentUser()){
+            throw new SaleException("The cart needs to log in using the user from the session");
+        }
+
+        this.customer = customer;
     }
 
     public User getCustomer() {

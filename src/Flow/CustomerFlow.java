@@ -1,20 +1,25 @@
 package Flow;
 
+import Exceptions.InsufficientStockException;
+import Exceptions.SaleException;
+import com.sun.tools.javac.Main;
 import model.Product.Category;
+import model.Product.Product;
+import model.Ultility.FindOrdersByStatus;
 import model.User.User;
 import model.User.Wallet;
 import model.sale.Cart;
+import model.sale.Order;
+import model.sale.OrderIten;
 import printer.Printer;
 import security.UserSession;
+import services.OrderService;
 import services.ProductService;
 import services.UserService;
 import services.WalletService;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.NoSuchElementException;
-import java.util.Scanner;
-import java.util.UUID;
+import java.util.*;
 
 public class CustomerFlow {
 
@@ -22,15 +27,19 @@ public class CustomerFlow {
     private final ProductService productService;
     private final WalletService walletService;
     private final Scanner scanner;
+    private final OrderService orderService;
 
     private final Cart cart;
 
-    public CustomerFlow(UserService userService, ProductService productService, Scanner scanner, WalletService walletService, Cart cart) {
+    public CustomerFlow(UserService userService, ProductService productService, Scanner scanner, WalletService walletService,
+                        Cart cart, OrderService orderService) {
+
         this.userService = userService;
         this.productService = productService;
         this.scanner = scanner;
         this.walletService = walletService;
         this.cart = cart;
+        this.orderService = orderService;
     }
 
     public Cart getCart() {
@@ -61,6 +70,15 @@ public class CustomerFlow {
                     productFlow();
                     break;
 
+                case 3:
+
+                    FindOrdersByStatus.byIdCustomer(UserSession.getCurrentUser().getId(), scanner, orderService);
+                    break;
+
+                case 4:
+                    cartFlow();
+                    break;
+
                 case 0:
 
                     UserSession.logout();
@@ -76,6 +94,87 @@ public class CustomerFlow {
         }
 
     }
+
+    //--------------- Flows ---------------
+
+    public void cartFlow(){
+
+        boolean inCart = true;
+        while (inCart) {
+
+            if (cart.getItens().isEmpty()) {
+                System.out.println("The cart is empty.");
+                inCart = false;
+
+            } else {
+
+                Printer.printCart(cart);
+
+                System.out.println("1 - Complete purchase");
+                System.out.println("2 - remove itens");
+                System.out.println("3 - Clean Cart");
+                System.out.println("0 - back");
+                System.out.print("-> ");
+                byte choiceCart = MainFlow.readByte(scanner);
+
+                switch (choiceCart){
+
+                    case 1 -> {
+
+
+                        System.out.print("Enter your password: ");
+                        String password = scanner.nextLine();
+
+                        try {
+                            Order order = orderService.completeOrder(password, cart);
+                            System.out.println("Purchase completed successfully!");
+
+                            Printer.lineBreak();
+                            Printer.line();
+                            Printer.printOrder(order);
+                            Printer.lineBreak();
+
+                            inCart = false;
+                        }catch (SecurityException | IllegalArgumentException | InsufficientStockException | SaleException e){
+                            System.out.println(e.getMessage());
+                        }
+                    }
+                    case 2 -> {
+
+                        System.out.println("Enter barcode: ");
+                        String barcode = scanner.nextLine();
+
+                        System.out.print("Quantity: ");
+                        int quantity = MainFlow.readInt(scanner);
+
+                        Optional<OrderIten> product = cart.getItens().stream()
+                                .filter(o -> o.getBarcode().equals(barcode))
+                                .findFirst();
+
+                        if (product.isPresent()){
+
+                            try {
+
+                                cart.removeProductByBarcode(barcode, quantity);
+                                System.out.println("Item removed Successfully!");
+                            }catch (IllegalArgumentException e){
+                                System.out.println(e.getMessage());
+                            }
+
+                        }else {
+                            System.out.println("Product not found");
+                        }
+                    }
+                    case 3 -> cart.clearCart();
+                    case 0 -> inCart = false;
+                    default -> System.out.println("Invalid choice.");
+                }
+
+
+            }
+        }
+    }
+
 
     private void productFlow(){
 
@@ -93,14 +192,17 @@ public class CustomerFlow {
 
                 case 1:
 
-                    productService.findAllProducts().forEach(Printer::printProduct);
-
-                    Printer.lineBreak();
                     Printer.line();
+                    MainFlow.menuSortPrice(productService.findAllProducts(), productService, scanner);
+
+                    selectAndAddProduct();
+                    Printer.line();
+
                     break;
 
                 case 2:
 
+                    Printer.line();
                     System.out.print("Provide ID: ");
 
                     UUID id = null;
@@ -108,10 +210,15 @@ public class CustomerFlow {
                     try {
 
                         id = UUID.fromString(scanner.nextLine());
+                        Product product = productService.findProductById(id);
+                        Printer.printProduct(product);
 
-                        Printer.printProduct(productService.findProductById(id));
+                        Printer.lineBreak();
+                        Printer.line();
 
-                    }catch (IllegalArgumentException e){
+                        promptAddToCart(product);
+
+                    }catch (IllegalArgumentException | SecurityException e){
                         System.out.println(e.getMessage());
 
                     }catch (NoSuchElementException e){
@@ -124,15 +231,24 @@ public class CustomerFlow {
 
                 case 3:
 
+                    Printer.line();
                     System.out.print("Provide Category: ");
                     String category = scanner.nextLine();
 
                     try {
 
-                        productService.findByCategory(category).forEach(Printer::printProduct);
+                        MainFlow.menuSortPrice(productService.findByCategory(category), productService, scanner);
+                        Printer.lineBreak();
+
+                        selectAndAddProduct();
+
+
                     }catch (NullPointerException e){
                         System.out.println("No products found for category: "+category);
                         System.out.println("Available categories: "+ Arrays.toString(Category.values()));
+
+                    }catch (IllegalArgumentException | SecurityException e){
+                        System.out.println(e.getMessage());
                     }
 
                     Printer.lineBreak();
@@ -141,14 +257,21 @@ public class CustomerFlow {
 
                 case 4:
 
+                    Printer.line();
                     System.out.print("Provide brand: ");
                     String brand = scanner.nextLine();
 
                     try {
 
-                        productService.findByBrand(brand).forEach(Printer::printProduct);
+                        MainFlow.menuSortPrice(productService.findByBrand(brand), productService, scanner);
+                        Printer.lineBreak();
+
+                        selectAndAddProduct();
+
                     }catch (NullPointerException e){
                         System.out.println("No products found for brand: "+brand);
+                    }catch (IllegalArgumentException | SecurityException e){
+                        System.out.println(e.getMessage());
                     }
 
                     Printer.lineBreak();
@@ -157,14 +280,24 @@ public class CustomerFlow {
 
                 case 5:
 
+                    Printer.line();
                     System.out.print("Provide name: ");
                     String name = scanner.nextLine();
 
                     try {
 
-                        Printer.printProduct(productService.findByname(name));
+                        Product product = productService.findByname(name);
+                        Printer.printProduct(product);
+
+                        Printer.lineBreak();
+                        Printer.line();
+
+                        promptAddToCart(product);
+
                     }catch (NoSuchElementException e){
                         System.out.println("Error: "+e.getMessage());
+                    }catch (IllegalArgumentException | SecurityException e){
+                        System.out.println(e.getMessage());
                     }
 
                     Printer.lineBreak();
@@ -173,14 +306,24 @@ public class CustomerFlow {
 
                 case 6:
 
+                    Printer.line();
                     System.out.print("Provide barcode: ");
                     String barcode = scanner.nextLine();
 
                     try {
 
-                        Printer.printProduct(productService.findProductByBarcode(barcode));
+                        Product product = productService.findProductByBarcode(barcode);
+                        Printer.printProduct(product);
+
+                        Printer.lineBreak();
+                        Printer.line();
+
+                        promptAddToCart(product);
+
                     }catch (NoSuchElementException e){
                         System.out.println("Error: "+e.getMessage());
+                    }catch (IllegalArgumentException | SecurityException e){
+                        System.out.println(e.getMessage());
                     }
 
                     Printer.lineBreak();
@@ -206,8 +349,9 @@ public class CustomerFlow {
         boolean runWallet = true;
         while (runWallet) {
 
-            Wallet wallet = walletService.findByUserID(UserSession.getCurrentUser().getId());
-            Printer.printWalletMenu(wallet);
+            User user = UserSession.getCurrentUser();
+            Wallet wallet = walletService.findByUserID(user.getId());
+            Printer.printWalletMenu(wallet, user);
             byte choiceWallet = MainFlow.readByte(scanner);
 
             switch (choiceWallet) {
@@ -222,6 +366,7 @@ public class CustomerFlow {
                         Printer.lineBreak();
                         System.out.println("Deposit of $ " + b + " confirmed!");
                         System.out.println("Current balance: " + walletService.findByID(wallet.getId()).getBalance());
+                        Printer.lineBreak();
 
                     }catch (NumberFormatException e){
                         System.out.println("Invalid numeric amount.");
@@ -244,29 +389,7 @@ public class CustomerFlow {
         }
 
     }
-    private void changePassword(){
 
-        System.out.println("======== Change Password ========");
-        System.out.print("Provide the current password: ");
-        String currentPassword = scanner.nextLine();
-
-        System.out.print("Provide the new password: ");
-        String newPassword = scanner.nextLine();
-
-        try {
-
-            userService.changePassword(currentPassword, newPassword);
-            System.out.println("Password updated successfully");
-        } catch (IllegalArgumentException e) {
-
-            System.out.println("Erro: " + e.getMessage());
-        }
-
-        Printer.lineBreak();
-        Printer.line();
-
-
-    }
     private void settingsFlow(){
 
         boolean runSettings = true;
@@ -274,6 +397,7 @@ public class CustomerFlow {
 
             Printer.printSettingsCustomerMenu();
             byte choiceSettings = MainFlow.readByte(scanner);
+            Printer.lineBreak();
 
             switch (choiceSettings) {
 
@@ -285,8 +409,8 @@ public class CustomerFlow {
 
                 case 2:
 
-                    User u = UserSession.getCurrentUser();
-                    Printer.printUser(u);
+                    Printer.line();
+                    Printer.printUser(UserSession.getCurrentUser());
                     Printer.lineBreak();
 
                     break;
@@ -307,4 +431,82 @@ public class CustomerFlow {
 
         }
     }
+    //--------------- Utility ---------------
+
+    private void changePassword(){
+
+        System.out.println("======== Change Password ========");
+        System.out.print("Provide the current password: ");
+        String currentPassword = scanner.nextLine();
+
+        System.out.print("Provide the new password: ");
+        String newPassword = scanner.nextLine();
+
+        try {
+
+            userService.changePassword(currentPassword, newPassword);
+            System.out.println("Password updated successfully");
+        } catch (IllegalArgumentException e) {
+
+            System.out.println("Erro: " + e.getMessage());
+        }
+
+        Printer.lineBreak();
+
+    }
+
+    private void selectAndAddProduct(){
+
+        System.out.println("1 - Add an item from the list cart");
+        System.out.println("0 - back");
+        System.out.print("-> ");
+        byte choice = MainFlow.readByte(scanner);
+
+        if (choice == 1){
+
+            try {
+
+                System.out.print("Enter barCode: ");
+                String barcode = scanner.nextLine();
+
+                System.out.print("Enter quantity: ");
+                int quantity = MainFlow.readInt(scanner);
+
+                Product product = productService.findProductByBarcode(barcode);
+                cart.addProduct(product, quantity);
+                System.out.printf("Added %dx '%s' to cart!\n", quantity, product.getName());
+            }catch (IllegalArgumentException | NoSuchElementException e){
+                System.out.println(e.getMessage());
+            }
+
+        }
+
+    }
+
+    private void promptAddToCart(Product p){
+        if (p == null){
+            throw new IllegalArgumentException("Invalid product");
+        }
+
+        System.out.println("1 - Add to cart");
+        System.out.println("0 - back");
+        byte choice = MainFlow.readByte(scanner);
+
+        if (choice == 1){
+
+            System.out.println("Enter quantity");
+            int quantity = MainFlow.readInt(scanner);
+
+            try {
+                cart.addProduct(p, quantity);
+                Printer.printCart(cart);
+            }catch (IllegalArgumentException | SaleException e){
+                System.out.println(e.getMessage());
+            }
+
+        }
+    }
+
+
+
 }

@@ -9,6 +9,7 @@ import model.sale.Order;
 import model.sale.OrderIten;
 import repository.Interfaces.OrderRepository;
 import security.PasswordHasher;
+import security.UserSession;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +38,7 @@ public class OrderService {
             throw new SaleException("The cart contains no products");
         }
 
-        User customer = cart.getCustomer();
+        User customer = UserSession.getCurrentUser();
 
         if (customer == null){
             throw new IllegalArgumentException("No authenticated customer associated with this cart.");
@@ -76,9 +77,15 @@ public class OrderService {
     public void cancelOrder(UUID id){
 
         Order order = findById(id);
-
         order.cancelOrder();
+
+        walletService.deposit(order.getCustumer().getId(), order.getValue());
+        order.getItens().forEach(o -> productService.increaseStrock(o.getIdProduct(), o.getQuantity()));
+
         orderRepository.save(order);
+
+
+
     }
 
     //---------------------------------//
