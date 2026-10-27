@@ -6,6 +6,7 @@ import model.Product.Product;
 import model.dto.ProductRequestDTO;
 import repository.Interfaces.ProductRepository;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Function;
 
@@ -168,6 +169,13 @@ public class ProductService {
         productRepository.delete(id);
         return p;
 
+    }
+    //----------------------------------//
+
+    public Product updateProduct(Product p, String newName, BigDecimal newPrice){
+
+        p.updateDetails(newName, newPrice);
+        return p;
     }
 
 }

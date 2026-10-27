@@ -13,7 +13,7 @@ public class Wallet {
 
         this.id = id;
         this.idUser = idUser;
-        this.balance = new BigDecimal(0);
+        this.balance = BigDecimal.ZERO;
 
     }
 

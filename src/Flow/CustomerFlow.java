@@ -420,6 +420,9 @@ public class CustomerFlow {
                     changePassword();
                     break;
 
+                case 4:
+                    changeEmail();
+                    break;
                 case 0:
                     runSettings = false;
                     break;
@@ -430,6 +433,10 @@ public class CustomerFlow {
             }
 
         }
+    }
+
+    private Scanner sca() {
+        return scanner;
     }
     //--------------- Utility ---------------
 
@@ -449,6 +456,28 @@ public class CustomerFlow {
         } catch (IllegalArgumentException e) {
 
             System.out.println("Erro: " + e.getMessage());
+        }
+
+        Printer.lineBreak();
+
+    }
+
+    private void changeEmail(){
+
+        System.out.println("======== Change Email ========");
+        System.out.print("Enter new email: ");
+        String newEmal = scanner.nextLine();
+
+        System.out.print("Enter your password: ");
+        String password = scanner.nextLine();
+
+        try {
+            userService.changeEmail(password, newEmal);
+            System.out.println("Email updated.");
+
+        }catch (IllegalArgumentException e){
+            System.out.println(e.getMessage());
+            Printer.lineBreak();
         }
 
         Printer.lineBreak();

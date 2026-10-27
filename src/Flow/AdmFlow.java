@@ -424,6 +424,18 @@ public class AdmFlow {
 
                     break;
 
+                case 10:
+
+                    System.out.print("Enter ID product: ");
+
+                   try {
+                       UUID id = UUID.fromString(scanner.nextLine());
+                       updateProduct(id);
+                   }catch (IllegalArgumentException e){
+                       System.out.println(e.getMessage());
+                   }
+                    break;
+
                 case 0:
                     runningProduct = false;
                     break;
@@ -568,7 +580,26 @@ public class AdmFlow {
 
     //---------------------------- Utility ----------------------------//
 
+    private Product updateProduct(UUID id){
 
+        Product p = productService.findProductById(id);
+
+        System.out.println("Updating product: "+p.getName());
+        System.out.println("Enter new values. [press ENTER to keep current value]");
+
+        System.out.print("New name ["+p.getName()+"]: ");
+        String newName = scanner.nextLine();
+
+        newName = newName.isBlank() ? p.getName() : newName;
+
+        System.out.println("New price ["+p.getPrice()+"]: ");
+        String priceInput = scanner.nextLine();
+
+        BigDecimal newPrice = priceInput.isBlank() ? p.getPrice() : new BigDecimal(priceInput);
+
+        return productService.updateProduct(p, newName, newPrice);
+
+    }
 
 
 

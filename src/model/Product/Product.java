@@ -5,11 +5,11 @@ import java.util.UUID;
 
 public class Product {
 
-    private UUID id;
+    private final UUID id;
     private String name;
-    private Category category;
+    private final Category category;
     private String brand;
-    private String barCode;
+    private final String barCode;
 
     private BigDecimal price;
     private int stock;
@@ -70,4 +70,17 @@ public class Product {
     public int getStock() {
         return stock;
     }
+
+    //---------------------//
+
+    public void updateDetails(String name, BigDecimal price){
+
+        if (name == null || name.isBlank()){
+            throw new IllegalArgumentException("Invalid name.");
+        }
+
+        this.name = name;
+        this.price = price;
+    }
+
 }

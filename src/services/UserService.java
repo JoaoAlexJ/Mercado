@@ -232,6 +232,46 @@ public class UserService {
         UserSession.login(userUpdated);
     }
 
+    public void changeEmail(String currentPassword, String newEmail){
+        String regexEmail = ("^[\\w.%]+@[\\w.]+\\.[a-z]{2,}$");
+
+        User user = UserSession.getCurrentUser();
+
+        if (user == null){
+            throw new SecurityException("No session active, please log in");
+        }
+
+        if (currentPassword == null || currentPassword.isBlank()){
+            throw new IllegalArgumentException("Invalid CurrentPassword");
+        }
+        if (newEmail == null || newEmail.isBlank()){
+            throw new IllegalArgumentException("Invalid email.");
+        }
+
+        if (!newEmail.matches(regexEmail)){
+            throw new IllegalArgumentException("Invalid email format.");
+        }
+
+        if (newEmail.equals(user.getEmail())){
+            throw new IllegalArgumentException("The new email must be different from the current one");
+        }
+
+        if (!PasswordHasher.checkPassword(currentPassword, user.getPassword())){
+            throw new SecurityException("Invalid password.");
+        }
+
+        User userUpdated = new User(
+                user.getId(),
+                user.getName(),
+                newEmail,
+                user.getPassword(),
+                user.getUserType()
+        );
+
+        userRepository.save(userUpdated);
+        UserSession.login(userUpdated);
+    }
+
 
 
 

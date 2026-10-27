@@ -74,6 +74,7 @@ public class Printer {
         System.out.println("7 - Find by Name");
         System.out.println("8 - Delete by ID");
         System.out.println("9 - Dele by barcode");
+        System.out.println("10 - Update product");
         System.out.println("0 - exit");
         System.out.print("-> ");
     }

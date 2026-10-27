@@ -8,6 +8,7 @@ import model.User.UserType;
 import model.dto.ProductRequestDTO;
 import model.dto.UserRequestDTO;
 import model.sale.Cart;
+import model.sale.Order;
 import printer.Printer;
 import repository.*;
 import repository.Interfaces.OrderRepository;
@@ -47,9 +48,10 @@ public class Main {
         CustomerFlow customerFlow = new CustomerFlow(userService, productService, scanner, walletService, new Cart(), orderService);
         MainFlow mainFlow = new MainFlow(userService, scanner, customerFlow, admFlow);
 
+
         createdMasterAdmin(userRepository);
         seedProducts(productService);
-
+        seedUsersAndOrders(userService, walletService, productService, orderService);
         //---------------------//
 
         mainFlow.start();
@@ -65,6 +67,37 @@ public class Main {
         userRepository.save(userAdm);
 
     }
+
+    public static void seedUsersAndOrders(UserService userService, WalletService walletService,
+                                          ProductService productService, OrderService orderService) {
+
+        userService.registerCustomer(new UserRequestDTO("Maria Silva", "maria@gmail.com", "Maria@123"));
+        User maria = userService.findByEmail("maria@gmail.com");
+
+        walletService.deposit(maria.getId(), new BigDecimal("500.00"));
+
+        Product teclado = productService.findProductByBarcode("5099206010130"); // Teclado
+        Product mouse = productService.findProductByBarcode("8886419010142");   // Mouse
+
+        userService.login("maria@gmail.com", "Maria@123");
+
+        Cart cart1 = new Cart();
+        cart1.setCustomer(maria);
+        cart1.addProduct(teclado, 1);
+        orderService.completeOrder("Maria@123", cart1);
+
+        Cart cart2 = new Cart();
+        cart2.setCustomer(maria);
+        cart2.addProduct(mouse, 2);
+        Order orderCancelada = orderService.completeOrder("Maria@123", cart2);
+
+        orderService.cancelOrder(orderCancelada.getId());
+
+        UserSession.logout();
+
+        System.out.println("Seed de usuários e pedidos carregado com sucesso!\n");
+    }
+
 
     public static void seedProducts(ProductService productService){
 
